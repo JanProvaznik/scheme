@@ -2,7 +2,51 @@
 NPRG041 course project
 [Scheme](https://standards.scheme.org/) programming language interpreter implemented in C++20.
 
+The interpreter should support features outlined in the [R3Rs standard](https://standards.scheme.org/official/r3rs.pdf): 
+First goals:
+- [ ] Handling different types of data, including numbers, booleans and lists
+- [ ] Control structures such as if/else statements
+- [ ] Defining and calling precedures, lambdas
+
+The interpreter should also include appropriate error-handling to detect and report syntax errors in the Scheme code.
+
+The project should include a comprehensive set of unit tests to ensure the correct behavior of the interpreter. The tests should cover all of the supported features of the interpreter and should be automated and easily runnable.
+
+
 ---
+---
+---
+---
+---
+---
+---
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Getting started
