@@ -10,6 +10,8 @@ First goals:
 
 The interpreter should also include appropriate error-handling to detect and report syntax errors in the Scheme code.
 
+actually I'll try to implement even version 5, it's not that much more complex and the report is better
+
 The project should include a comprehensive set of unit tests to ensure the correct behavior of the interpreter. The tests should cover all of the supported features of the interpreter and should be automated and easily runnable.
 
 
