@@ -16,6 +16,17 @@ The project should include a comprehensive set of unit tests to ensure the corre
 
 
 ---
+
+MVP:
+parse to AST,  
+
+I want a class for 
+- pair
+- number types
+- char
+- bool
+- lib functions
+- vector
 ---
 ---
 ---
