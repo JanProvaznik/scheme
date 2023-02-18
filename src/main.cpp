@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 
+// Scheme Interpreter implemented in C++
+
 std::string read_file(const std::string & path)
 {
   std::ifstream file(path);
@@ -10,22 +12,52 @@ std::string read_file(const std::string & path)
   buffer << file.rdbuf();
   return buffer.str();
 }
-class Environment {};
-void eval(const Environment& env, const std::string & source)
+class Environment {
+// idea: have a map that maps strings to vars
+// var is a superclass of all types which are: number, string, pair,
+// or var could be just a string that points to code
+// which is better?
+
+
+
+};
+
+class AST {};
+
+std::string eval(const Environment& env, const std::string & source)
 {
   std::cout << source << std::endl;
 }
 
+// so first I want a simple tokenizer that can give me a ast from the
+
+std::string read()
+{
+  // read source and return a list of tokens
+  std::string line;
+  std::getline(std::cin, line);
+  return line;
+}
+
+void print(const std::string & source)
+{
+  std::cout << source << std::endl;
+}
+
+void rep(const Environment& env){
+  std::string source = read();
+  // print evaled
+  print(eval(env, source));
+
+}
+
 
 void repl(){
-  std::string line;
   Environment environment;
   while (true)
   {
-
     std::cout << ">> ";
-    std::getline(std::cin, line);
-    eval(environment, line);
+    rep(environment);
   }
 
 }
