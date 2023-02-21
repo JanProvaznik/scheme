@@ -17,16 +17,20 @@ class Environment {
 // var is a superclass of all types which are: number, string, pair,
 // or var could be just a string that points to code
 // which is better?
-
+int a = 1;
 
 
 };
 
-class AST {};
+class AST {
+int b =2;
+
+};
 
 std::string eval(const Environment& env, const std::string & source)
 {
   std::cout << source << std::endl;
+  return source;
 }
 
 // so first I want a simple tokenizer that can give me a ast from the
@@ -78,3 +82,11 @@ int main(int argc, char const *argv[])
 
   return 0;
 }
+///
+///
+///
+// a header file for main :
+
+// Scheme Interpreter implemented in C++
+
+// a header file for environment:
