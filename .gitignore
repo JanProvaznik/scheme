@@ -1,11 +1,5 @@
 *CMakeFiles*
 build/*
-src/CMakeCache.txt
-src/cmake_install.cmake
-src/CPackConfig.cmake
-src/CPackSourceConfig.cmake
-src/CTestTestfile.cmake
-src/DartConfiguration.tcl
 *.out
 src/Makefile
 .vscode

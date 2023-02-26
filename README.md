@@ -35,7 +35,9 @@ I want a class for
 ---
 ---
 
-
+# TODO
+- [ ] implement `eval` function
+- make case-insensitive
 
 
 

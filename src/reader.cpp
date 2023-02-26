@@ -3,45 +3,13 @@
 #include <string_view>
 #include <iostream>
 #include <utility>
-enum class TOKEN_TYPE
-{
-  LPAREN,
-  RPAREN,
-  STRING,
-  INTEGER,
-  FLOAT,
-  IDENTIFIER,
-  QUOTE,
-  EOF_TOKEN,
-  TRUE,
-  FALSE,
-};
+#include "reader.h"
 
-class Tokenizer
-{
-
-bool is_scheme_alpha(unsigned char c)
-{
-  // check if c is a scheme extended alpha character that can be used as an identifier
-  // scheme symbols are any of the following characters: ! $ % & * + - . / : < = > ? @ ^ _ ~
-  // or any alphanumeric character, //TODO: this is a bit ambiguous from the spec, I could also exclude numbers but that would be weird
-  if (std::isalnum(c))
-  {
-    return true;
-  }
-  if (c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == '.' || c == '/' || c == ':' || c == '<' || c == '=' || c == '>' || c == '?' || c == '@' || c == '^' || c == '_' || c == '~')
-  {
-    return true;
-  }
-  return false;
-}
-
-public:
-explicit Tokenizer(const std::string &source) : source(source), pos(0)
+Tokenizer::Tokenizer(const std::string &source) : source(source), pos(0)
 {
 }
 // this could theoretically be done with regex but it seems very slow and unreliable
-std::pair<TOKEN_TYPE, std::string_view> next_token()
+std::pair<TOKEN_TYPE, std::string_view> Tokenizer::next_token()
 {
   // skip whitespace
   while (pos < source.size() && std::isspace(source[pos]))
@@ -149,22 +117,32 @@ std::pair<TOKEN_TYPE, std::string_view> next_token()
   throw std::runtime_error("unknown token");
 }
 
-private:
-std::string_view source;
-size_t pos;
-};
-// tests for the tokenizer
-void t1()
+
+bool Tokenizer::is_scheme_alpha(unsigned char c)
 {
-  std::string source = "(define (factorial n) (if (= n 0) 1 (* n (factorial (- n 1)))))";
-  Tokenizer tokenizer(source);
-  while (true)
+  // check if c is a scheme extended alpha character that can be used as an identifier
+  // scheme symbols are any of the following characters: ! $ % & * + - . / : < = > ? @ ^ _ ~
+  // or any alphanumeric character, //TODO: this is a bit ambiguous from the spec, I could also exclude numbers but that would be weird
+  if (std::isalnum(c))
   {
-    auto [type, token] = tokenizer.next_token();
-    if (type == TOKEN_TYPE::EOF_TOKEN)
-    {
-      break;
-    }
-    std::cout << token << std::endl;
+    return true;
   }
+  if (c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == '.' || c == '/' || c == ':' || c == '<' || c == '=' || c == '>' || c == '?' || c == '@' || c == '^' || c == '_' || c == '~')
+  {
+    return true;
+  }
+  return false;
 }
+
+std::vector<std::pair<TOKEN_TYPE, std::string_view> > Tokenizer::tokenize()
+{
+  std::vector<std::pair<TOKEN_TYPE, std::string_view> > tokens;
+  while (pos < source.size())
+  {
+    tokens.push_back(next_token());
+  }
+
+  return tokens;
+}
+
+

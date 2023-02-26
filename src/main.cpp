@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "reader.h"
 
 // Scheme Interpreter implemented in C++
 
