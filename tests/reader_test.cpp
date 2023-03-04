@@ -1,10 +1,5 @@
-// #include <gtest/gtest.h>
-// how to get this to work with cmake?
-// ?? First, you need to include the header file for the class you want to test
-
-
-// include the header file for the class you want to test
 #include "../src/reader.h"
+//#include <doctest.h>
 
 // Demonstrate some basic assertions.
 // TEST(HelloTest, BasicAssertions) {
