@@ -9,62 +9,75 @@
 enum class ValueType {
     List,
     Pair,
-    String
-    ,Bool
-    ,Integer
-    ,Float
-    , Function
-    , Symbol
+    String, Bool, Integer, Float, Function, Symbol
 
 
 };
 
 
-class Value
-{
+class Value {
     ValueType type;
     std::string name;
 public:
-    Value(ValueType type) : type(type) {}
-    virtual ~Value() {}
-    std::string get_name() const { return name; }
-    ValueType get_type() const { return type; }
-    virtual std::string to_string() const {return "abstract value";};
-    void print() const { std::cout << to_string() << std::endl; }
+    Value(ValueType type) : type(type) {
+    }
+
+    virtual ~Value() {
+    }
+
+    std::string get_name() const {
+        return name;
+    }
+
+    ValueType get_type() const {
+        return type;
+    }
+
+    virtual std::string to_string() const {
+        return "abstract value";
+    };
+
+    void print() const {
+        std::cout << to_string() << std::endl;
+    }
 
 };
 
-class PairValue : public Value
-{
+class PairValue : public Value {
     std::shared_ptr<Value> car;
     std::shared_ptr<Value> cdr;
 public:
-    PairValue(std::shared_ptr<Value> car, std::shared_ptr<Value> cdr) : Value(ValueType::List), car(car), cdr(cdr) {}
+    PairValue(std::shared_ptr<Value> car, std::shared_ptr<Value> cdr) : Value(ValueType::List), car(car), cdr(cdr) {
+    }
+
     std::string to_string() const override;
+
     void set_car(std::shared_ptr<Value> car);
+
     void set_cdr(std::shared_ptr<Value> cdr);
 };
 
-class ListValue : public Value
-{
+class ListValue : public Value {
     std::vector<std::shared_ptr<Value> > values;
 public:
     ListValue() : Value(ValueType::List), values() {
     }
+
     std::string to_string() const override;
-    void add_value(const std::shared_ptr<Value> & value);
+
+    void add_value(const std::shared_ptr<Value> &value);
 };
 
-class SymbolValue : public Value
-{
+class SymbolValue : public Value {
     std::string value;
 public:
-    SymbolValue(std::string value) : Value(ValueType::Symbol), value(std::move(value)) {}
+    SymbolValue(std::string value) : Value(ValueType::Symbol), value(std::move(value)) {
+    }
+
     std::string to_string() const override;
 };
 
-class NumberValue : public Value
-{
+class NumberValue : public Value {
 protected:
     NumberValue(ValueType type) : Value(type) {
     }
@@ -73,35 +86,43 @@ protected:
 // don't use raw pointers but shared pointers
 using FunctionSharedPointer = std::shared_ptr<Value> (*)(size_t, std::shared_ptr<Value> *);
 
-class FunctionValue : public Value
-{
+class FunctionValue : public Value {
 public:
-    FunctionValue(FunctionSharedPointer function) : Value(ValueType::Function), function(function) {}
-    FunctionSharedPointer get_function() const { return function; }
+    FunctionValue(FunctionSharedPointer function) : Value(ValueType::Function), function(function) {
+    }
+
+    FunctionSharedPointer get_function() const {
+        return function;
+    }
 
 private:
-    FunctionSharedPointer function { nullptr }
+    FunctionSharedPointer function{nullptr};
 };
 
 class IntegerValue : public NumberValue {
     std::int64_t value;
 public:
-    explicit IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer){
+    explicit IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer) {
         this->value = value;
     }
 
     std::string to_string() const override;
 };
+
 class FloatValue : public NumberValue {
-    FloatValue() : NumberValue(ValueType::List) {}
+    FloatValue() : NumberValue(ValueType::List) {
+    }
 
     double value;
 
 };
+
 class StringValue : public Value {
     std::string value;
 public:
-    StringValue(std::string value) : Value(ValueType::String), value(std::move(value)) {}
+    StringValue(std::string value) : Value(ValueType::String), value(std::move(value)) {
+    }
+
     std::string to_string() const override;
 };
 
@@ -111,6 +132,7 @@ class BoolValue : public Value {
 public:
     explicit BoolValue(bool value) : Value(ValueType::Bool), value(value) {
     }
+
     std::string to_string() const override;
 };
 

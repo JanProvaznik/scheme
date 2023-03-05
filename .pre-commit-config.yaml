@@ -8,3 +8,4 @@ repos:
       - id: uncrustify
         args: [--replace, --no-backup]
       - id: cppcheck
+        args: [--std=c++20]
