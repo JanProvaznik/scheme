@@ -7,10 +7,14 @@
 #define SCHEME_TYPES_H
 
 enum class ValueType {
-    ListValue,
+    List,
     Pair,
     String
     ,Bool
+    ,Integer
+    ,Float
+    , Function
+    , Symbol
 
 
 };
@@ -35,7 +39,7 @@ class PairValue : public Value
     std::shared_ptr<Value> car;
     std::shared_ptr<Value> cdr;
 public:
-    PairValue(std::shared_ptr<Value> car, std::shared_ptr<Value> cdr) : Value(ValueType::ListValue), car(car), cdr(cdr) {}
+    PairValue(std::shared_ptr<Value> car, std::shared_ptr<Value> cdr) : Value(ValueType::List), car(car), cdr(cdr) {}
     std::string to_string() const override;
     void set_car(std::shared_ptr<Value> car);
     void set_cdr(std::shared_ptr<Value> cdr);
@@ -45,7 +49,7 @@ class ListValue : public Value
 {
     std::vector<std::shared_ptr<Value> > values;
 public:
-    ListValue() : Value(ValueType::ListValue), values() {
+    ListValue() : Value(ValueType::List), values() {
     }
     std::string to_string() const override;
     void add_value(const std::shared_ptr<Value> & value);
@@ -55,7 +59,7 @@ class SymbolValue : public Value
 {
     std::string value;
 public:
-    SymbolValue(std::string value) : Value(ValueType::String), value(value) {}
+    SymbolValue(std::string value) : Value(ValueType::Symbol), value(std::move(value)) {}
     std::string to_string() const override;
 };
 
@@ -66,18 +70,30 @@ protected:
     }
 };
 
+// don't use raw pointers but shared pointers
+using FunctionSharedPointer = std::shared_ptr<Value> (*)(size_t, std::shared_ptr<Value> *);
+
+class FunctionValue : public Value
+{
+public:
+    FunctionValue(FunctionSharedPointer function) : Value(ValueType::Function), function(function) {}
+    FunctionSharedPointer get_function() const { return function; }
+
+private:
+    FunctionSharedPointer function { nullptr }
+};
 
 class IntegerValue : public NumberValue {
     std::int64_t value;
 public:
-    explicit IntegerValue(std::int64_t value) : NumberValue(ValueType::ListValue)  {
+    explicit IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer){
         this->value = value;
     }
 
     std::string to_string() const override;
 };
 class FloatValue : public NumberValue {
-    FloatValue() : NumberValue(ValueType::ListValue) {}
+    FloatValue() : NumberValue(ValueType::List) {}
 
     double value;
 
@@ -85,24 +101,17 @@ class FloatValue : public NumberValue {
 class StringValue : public Value {
     std::string value;
 public:
-    StringValue(std::string value) : Value(ValueType::String), value(value) {}
-    std::string to_string() const override
-    {
-        return value;
-    }
+    StringValue(std::string value) : Value(ValueType::String), value(std::move(value)) {}
+    std::string to_string() const override;
 };
 
 
-class BooleanValue : public Value {
+class BoolValue : public Value {
     bool value;
-
 public:
-    explicit BooleanValue(bool value) : Value(ValueType::Bool), value(value) {
+    explicit BoolValue(bool value) : Value(ValueType::Bool), value(value) {
     }
-    std::string to_string() const override
-    {
-        return value ? "#t" : "#f";
-    }
+    std::string to_string() const override;
 };
 
 // class Complex : public Number {}; # TODO

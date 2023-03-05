@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -16,13 +17,46 @@ std::string read_file(const std::string & path)
   return buffer.str();
 }
 class Environment {
-// idea: have a map that maps strings to vars
-// var is a superclass of all types which are: number, string, pair,
-// or var could be just a string that points to code
-// which is better?
+public:
+    Environment() : outer(nullptr) {}
+    Environment(std::shared_ptr<Environment> outer) : outer(outer) {}
+    std::shared_ptr<Value> get(const std::string & key)
+    {
+        if (values.find(key) != values.end())
+        {
+            return values[key];
+        }
+        if (outer != nullptr)
+        {
+            return outer->get(key);
+        }
+        throw std::runtime_error("Key not found");
+    }
+    void set(const std::string & key, const std::shared_ptr<Value> & value)
+    {
+        values[key] = value;
+    }
+    std::shared_ptr<Environment> get_outer() const
+    {
+        return outer;
+    }
+
+private:
+    std::map<std::string, std::shared_ptr<Value>> values;
+    std::shared_ptr<Environment> outer;
+
 
 
 };
+
+class BaseEnvironment : public Environment
+        {
+    BaseEnvironment() : Environment(nullptr){
+
+
+    }
+
+        };
 
 
 std::shared_ptr<Value> eval(const Environment& env, const std::string & source)
@@ -37,11 +71,6 @@ std::shared_ptr<Value> eval(const Environment& env, const std::string & source)
 
 }
 
-// so first I want a simple tokenizer that can give me a ast from the
-
-void pr_str(Value & value) {
-    value.print();
-}
 std::string read()
 {
   // read source and return a list of tokens
@@ -54,6 +83,11 @@ void rep(const Environment& env){
   std::string source = read();
   pr_str(*eval(env, source));
 
+}
+
+void execute_file(std::string & path){
+    Environment e;
+    pr_str(*eval(e, read_file("path")));
 }
 
 
@@ -77,8 +111,9 @@ int main(int argc, char const *argv[])
   {
     // run file given as an argument
     // read file
-    std::string source = read_file(argv[1]);
-    eval(Environment(), source);
+//    std::string source = read_file(argv[1]);
+//    eval(Environment(), source);
+      execute_file((std::string &) argv[1]);
 
   }
 

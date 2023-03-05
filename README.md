@@ -6,7 +6,7 @@ The interpreter should support features outlined in the [R3Rs standard](https://
 First goals:
 - [ ] Handling different types of data, including numbers, booleans and lists
 - [ ] Control structures such as if/else statements
-- [ ] Defining and calling precedures, lambdas
+- [ ] Defining and calling procedures, lambdas
 
 The interpreter should also include appropriate error-handling to detect and report syntax errors in the Scheme code.
 
@@ -18,38 +18,37 @@ The project should include a comprehensive set of unit tests to ensure the corre
 ---
 
 MVP:
-parse to AST,  
+parse to AST,
 
-I want a class for 
-- pair
-- number types
-- char
-- bool
-- lib functions
-- vector
----
----
----
----
----
----
 ---
 # done
 - lexing
+- parsing
 
 
 # TODO
-- [ ] implement `eval` function
-- make case-insensitive
-- vector constants
-# maybe
+- eval 
+- environments
+- define, lambda, let, let*
+- if, cond
+- quote, quasiquote, unquote, unquote-splicing
+- tail call optimization
+- tests that are automated and have good coverage
+- error checking
+## maybe
 - character constatnts #\
 - hash (#) numbers (e,i,b,o,d,x)
+- vector constants
+
+## bugs
+- error on blank line
+- make case-insensitive
 
 
-
-
+# Resources used:
+- [mal - Make a Lisp](https://github.com/kanaka/mal)
+- https://craftinginterpreters.com/
+- https://standards.scheme.org/official/r5rs.pdf
+- Daniel P. Friedman, Matthias Felleisen, The Little Schemer, 4th Edition
 ## License
 MIT 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.

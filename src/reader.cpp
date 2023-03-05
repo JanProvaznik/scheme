@@ -196,7 +196,7 @@ std::shared_ptr<ListValue> Reader::read_list(Tokenizer &tokenizer) {
 //    It accumulates the results into a List type. If your language does not have a sequential data type that can hold mal type values you may need to implement one (in types.qx).
 //    Note that read_list repeatedly calls read_form rather than read_atom.
 //    This mutually recursive definition between read_list and read_form is what allows lists to contain lists.
-      // create a ListValue object
+      // create a List object
         std::shared_ptr<ListValue> list = std::make_shared<ListValue>();
         while (true) {
             // read the next token
