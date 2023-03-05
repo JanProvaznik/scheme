@@ -24,11 +24,12 @@ parse to AST,
 # done
 - lexing
 - parsing
+- eval
+- basic environment
 
 
 # TODO
-- eval 
-- environments
+- library functions
 - define, lambda, let, let*
 - if, cond
 - quote, quasiquote, unquote, unquote-splicing

@@ -66,37 +66,64 @@ public:
 BaseEnvironment() : Environment(nullptr)  {     // todo: move to impl file
   auto plus_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > & argv) {
 				 throw_on_bad_arity((std::string &) "+", 2, argc);// FIXME: this should be elsewhere
-				 auto a = std::static_pointer_cast<IntegerValue>(argv[0]); // TODO: consider not casting here it seems wrong
-				 auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
-				 return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() + b->get_value()));
+				 // if any is float then return float else return int
+				 if (argv[0]->get_type() == ValueType::Float || argv[1]->get_type() == ValueType::Float) {
+				   return std::static_pointer_cast<Value>(std::make_shared<FloatValue>(argv[0]->to_double() + argv[1]->to_double()));
+				 }else{
+				   auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
+				   auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
+				   return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() + b->get_value()));
+				 }
+
 			       };
+
   set("+", std::make_shared<FunctionValue>(plus_function_pointer));
 
   auto minus_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > & argv) {
-				  throw_on_bad_arity((std::string &) "-", 2, argc); // FIXME: this should be elsewhere
-				  auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
-				  auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
-				  return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() - b->get_value()));
+				  throw_on_bad_arity((std::string &) "-", 2, argc);// FIXME: this should be elsewhere
+				  // if any is float then return float else return int
+				  if (argv[0]->get_type() == ValueType::Float || argv[1]->get_type() == ValueType::Float) {
+				    return std::static_pointer_cast<Value>(std::make_shared<FloatValue>(argv[0]->to_double() - argv[1]->to_double()));
+				  }else{
+				    auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
+				    auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
+				    return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() - b->get_value()));
+				  }
+
 				};
+
   set("-", std::make_shared<FunctionValue>(minus_function_pointer));
 
   auto multiply_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > & argv) {
-				     throw_on_bad_arity((std::string &) "*", 2, argc); // FIXME: this should be elsewhere
-				     auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
-				     auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
-				     return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() * b->get_value()));
+				     throw_on_bad_arity((std::string &) "*", 2, argc);// FIXME: this should be elsewhere
+				     // if any is float then return float else return int
+				     if (argv[0]->get_type() == ValueType::Float || argv[1]->get_type() == ValueType::Float) {
+				       return std::static_pointer_cast<Value>(std::make_shared<FloatValue>(argv[0]->to_double() * argv[1]->to_double()));
+				     }else{
+				       auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
+				       auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
+				       return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() * b->get_value()));
+				     }
+
 				   };
 
   set("*", std::make_shared<FunctionValue>(multiply_function_pointer));
 
   auto divide_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > & argv) {
-				   throw_on_bad_arity((std::string &) "/", 2, argc); // FIXME: this should be elsewhere
-				   auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
-				   auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
-				   return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() / b->get_value()));
+				   throw_on_bad_arity((std::string &) "/", 2, argc);// FIXME: this should be elsewhere
+				   // if any is float then return float else return int
+				   if (argv[0]->get_type() == ValueType::Float || argv[1]->get_type() == ValueType::Float) {
+				     return std::static_pointer_cast<Value>(std::make_shared<FloatValue>(argv[0]->to_double() / argv[1]->to_double()));
+				   }else{
+				     auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
+				     auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
+				     return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(a->get_value() / b->get_value()));
+				   }
+
 				 };
 
   set("/", std::make_shared<FunctionValue>(divide_function_pointer));
+
 
   // TODO: add more functions
   // TODO: solve different types of args

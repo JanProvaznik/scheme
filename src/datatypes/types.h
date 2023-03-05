@@ -25,6 +25,9 @@ Value(ValueType type) : type(type) {
 
 virtual ~Value() {
 }
+virtual double to_double() const {
+  return 0;
+}
 
 std::string get_name() const {
   return name;
@@ -110,17 +113,30 @@ explicit IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer) {
 std::int64_t get_value() const {
   return value;
 }
+double to_double() const override {
+  return value;
+}
 
 
 std::string to_string() const override;
 };
 
 class FloatValue : public NumberValue {
-FloatValue() : NumberValue(ValueType::Float) {
+double value;
+public:
+FloatValue(double value) : NumberValue(ValueType::Float) {
+  this->value = value;
 }
 
-double value;
+double get_value() const {
+  return value;
+}
+double to_double() const override {
+  return value;
+}
 
+
+std::string to_string() const override;
 };
 
 class StringValue : public Value {

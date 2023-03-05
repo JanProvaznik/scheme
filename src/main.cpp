@@ -16,6 +16,11 @@ std::string read_file(const std::string &path) {
   return buffer.str();
 }
 
+std::vector special_forms = {
+  "let",
+  "let*",
+  "define",
+};
 
 
 std::shared_ptr<Value> eval_list(std::shared_ptr<ListValue> list, const Environment &env) {
@@ -31,7 +36,11 @@ std::shared_ptr<Value> eval_list(std::shared_ptr<ListValue> list, const Environm
       auto a = function->get_function()(args.size(), args);
       return a;
 
+    }else{ // ???
+
     }
+  }else{
+    // FIXME: what to do here?
   }
 }
 std::shared_ptr<Value> eval_ast(const std::shared_ptr<Value> &value, const Environment &env) {
@@ -40,11 +49,11 @@ std::shared_ptr<Value> eval_ast(const std::shared_ptr<Value> &value, const Envir
   }
   else if (value->get_type() == ValueType::List) {
     auto list = std::static_pointer_cast<ListValue>(value);
-    auto result = std::make_shared<ListValue>();
+    auto list_with_evaluated_content = std::make_shared<ListValue>();
     for (size_t i = 0; i < list->size(); ++i) {
-      result->add_value(eval_ast(list->get_value(i), env));
+      list_with_evaluated_content->add_value(eval_ast(list->get_value(i), env));
     }
-    return eval_list(result, env);
+    return eval_list(list_with_evaluated_content, env);
   }
   else {
     return value;
