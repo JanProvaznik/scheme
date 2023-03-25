@@ -2,7 +2,7 @@
 #include <iostream>
 #include "datatypes/types.h"
 
-void pr_str(Value &value) {
+void print(Value &value) {
   value.print();
 }
 

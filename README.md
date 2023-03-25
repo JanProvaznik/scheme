@@ -32,7 +32,7 @@ parse to AST,
 - library functions
 - define, lambda, let, let*
 - if, cond
-- quote, quasiquote, unquote, unquote-splicing
+- quote, , unquote, unquote-splicing
 - tail call optimization
 - tests that are automated and have good coverage
 - error checking
@@ -40,12 +40,12 @@ parse to AST,
 - character constatnts #\
 - hash (#) numbers (e,i,b,o,d,x)
 - vector constants
-
+- quasiquote
 ## bugs
 - error on blank line
 - make case-insensitive
-
-
+- () should be a valid expression
+- invalid parentheses in repl should throw error
 # Resources used:
 - [mal - Make a Lisp](https://github.com/kanaka/mal)
 - https://craftinginterpreters.com/

@@ -113,13 +113,13 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
 	}
 	if (c == '.') {
 	  if (saw_dot) {
-	    goto notnumber;
+	    goto not_number;
 	  }
 	  saw_dot = true;
 	  continue;
 	}
 	if (!std::isdigit(c)) {
-	  goto notnumber;
+	  goto not_number;
 	}
 	++i;
       }
@@ -132,7 +132,7 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
     std::string token = source.substr(pos, end - pos);
     // check that it's really an integer and not some kind of obscure symbol like -1-1
     if (token == "-") {
-      goto notnumber;
+      goto not_number;
     }
     size_t i = 0;
     for (auto c : token) {
@@ -141,7 +141,7 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
 	continue;
       }
       if (!std::isdigit(c)) {
-	goto notnumber;
+	goto not_number;
       }
       ++i;
     }
@@ -151,7 +151,7 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
     this->current_token = pair;
     return pair;
   }
-notnumber:
+not_number:
   // check if we have an identifier symbol, actually we don't have to consider numbers because are not mentioned in the spec
   if (is_scheme_alpha(source[pos])) {
     // find the end of the identifier
