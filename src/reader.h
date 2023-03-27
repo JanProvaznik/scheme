@@ -25,14 +25,14 @@ class Tokenizer
 {
 std::pair<TOKEN_TYPE, std::string> current_token;
 public:
-explicit Tokenizer(const std::string& source);
+explicit Tokenizer(std::string  source);
 
 std::pair<TOKEN_TYPE, std::string> next_token();
 std::pair<TOKEN_TYPE, std::string> peek_token();
 std::vector<std::pair<TOKEN_TYPE, std::string> > tokenize();
 
 private:
-bool is_scheme_alpha(unsigned char c);
+static bool is_scheme_alpha(unsigned char c);
 
 std::string source;
 size_t pos;
@@ -42,7 +42,7 @@ size_t pos;
 class Reader
 {
 std::shared_ptr<ListValue> read_list(Tokenizer& tokenizer);
-std::shared_ptr<Value> read_atom(Tokenizer& tokenizer);
+static std::shared_ptr<Value> read_atom(Tokenizer& tokenizer);
 
 public:
 

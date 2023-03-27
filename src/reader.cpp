@@ -1,4 +1,5 @@
 #include <string>
+#include <utility>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -6,7 +7,7 @@
 #include "reader.h"
 
 
-Tokenizer::Tokenizer(const std::string &source) : source(source), pos(0) {
+Tokenizer::Tokenizer(std::string source) : source(std::move(source)), pos(0) {
   this->next_token();
 }
 
@@ -237,14 +238,23 @@ std::shared_ptr<Value> Reader::read_atom(Tokenizer &tokenizer) {
     auto value = std::make_shared<FloatValue>(std::stof(tokenizer.peek_token().second));
     return value;
   } else if (tokenizer.peek_token().first == TOKEN_TYPE::IDENTIFIER) {
-    // create an IdentifierValue object
+    if (tokenizer.peek_token().second == "nil") {
+      auto value = std::make_shared<NilValue>();
+      return value;
+    }
     auto value = std::make_shared<SymbolValue>(tokenizer.peek_token().second);
     return value;
   } else if (tokenizer.peek_token().first == TOKEN_TYPE::STRING) {
     // create a StringValue object
     auto value = std::make_shared<StringValue>(tokenizer.peek_token().second);
     return value;
+  } else if (tokenizer.peek_token().first == TOKEN_TYPE::TRUE) {
+    auto value = std::make_shared<BoolValue>(true);
+    return value;
+  } else if (tokenizer.peek_token().first == TOKEN_TYPE::FALSE) {
+    auto value = std::make_shared<BoolValue>(false);
+    return value;
   } else {
-    // ??? TODO:
+    throw std::runtime_error("unknown token");
   }
 }

@@ -41,3 +41,11 @@ std::string IntegerValue::to_string() const {
 }
 
 
+std::string FunctionValue::to_string() const {
+  return "#<function>";
+}
+std::string NilValue::to_string() const {
+  return "nil";
+}
+
+

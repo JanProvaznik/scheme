@@ -30,9 +30,9 @@ parse to AST,
 
 # TODO
 - library functions
-- define, lambda, let, let*
+- lambda, let, set!
 - if, cond
-- quote, , unquote, unquote-splicing
+- quote, quasiquote, unquote, unquote-splicing
 - tail call optimization
 - tests that are automated and have good coverage
 - error checking
@@ -44,7 +44,6 @@ parse to AST,
 ## bugs
 - error on blank line
 - make case-insensitive
-- () should be a valid expression
 - invalid parentheses in repl should throw error
 # Resources used:
 - [mal - Make a Lisp](https://github.com/kanaka/mal)

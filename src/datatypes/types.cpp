@@ -13,3 +13,6 @@ std::shared_ptr<Value> ListValue::get_value(size_t index) const {
 size_t ListValue::size() const {
   return values.size();
 }
+IntegerValue::IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer) {
+  this->value = value;
+}

@@ -9,9 +9,7 @@
 enum class ValueType {
   List,
   Pair,
-  String, Bool, Integer, Float, Function, Symbol
-
-
+  String, Bool, Integer, Float, Function, Symbol, Nil, Closure
 };
 
 
@@ -25,6 +23,7 @@ Value(ValueType type) : type(type) {
 
 virtual ~Value() {
 }
+
 virtual double to_double() const {
   return 0;
 }
@@ -36,6 +35,11 @@ std::string get_name() const {
 ValueType get_type() const {
   return type;
 }
+
+virtual bool is_true() const {
+  return false;
+}
+
 
 virtual std::string to_string() const {
   return "abstract value";
@@ -70,7 +74,9 @@ ListValue() : Value(ValueType::List), values() {
 std::string to_string() const override;
 
 void add_value(const std::shared_ptr<Value> &value);
+
 std::shared_ptr<Value> get_value(size_t index) const;
+
 size_t size() const;
 };
 
@@ -91,6 +97,7 @@ NumberValue(ValueType type) : Value(type) {
 
 // don't use raw pointers but shared pointers
 using FunctionSharedPointer = std::shared_ptr<Value> (*)(size_t, std::vector<std::shared_ptr<Value> > &);
+
 class FunctionValue : public Value {
 public:
 explicit FunctionValue(FunctionSharedPointer function) : Value(ValueType::Function), function(function) {
@@ -100,19 +107,22 @@ FunctionSharedPointer get_function() const {
   return function;
 }
 
+std::string to_string() const;
+
 private:
 FunctionSharedPointer function{nullptr};
+
 };
 
 class IntegerValue : public NumberValue {
 std::int64_t value;
 public:
-explicit IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer) {
-  this->value = value;
-}
+explicit IntegerValue(std::int64_t value);
+
 std::int64_t get_value() const {
   return value;
 }
+
 double to_double() const override {
   return value;
 }
@@ -131,6 +141,7 @@ FloatValue(double value) : NumberValue(ValueType::Float) {
 double get_value() const {
   return value;
 }
+
 double to_double() const override {
   return value;
 }
@@ -156,7 +167,22 @@ explicit BoolValue(bool value) : Value(ValueType::Bool), value(value) {
 }
 
 std::string to_string() const override;
+
+bool is_true() const override {
+  return value;
+}
 };
+
+
+class NilValue : public Value {
+public:
+NilValue() : Value(ValueType::Nil) {
+}
+
+std::string to_string() const override;
+};
+
+
 
 // class Complex : public Number {}; # TODO
 // class Rational : public Number {};
