@@ -70,6 +70,8 @@ std::vector<std::shared_ptr<Value> > values;
 public:
 ListValue() : Value(ValueType::List), values() {
 }
+ListValue(std::vector<std::shared_ptr<Value> > values) : Value(ValueType::List), values(std::move(values)) {
+}
 
 std::string to_string() const override;
 

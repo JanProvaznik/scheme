@@ -5,10 +5,12 @@
 #include "types.h"
 #include "../environment.h"
 #include "../util.h"
+#include <vector>
+#include <string>
 
 class Closure : public Value {
 EnvironmentPtr env_;
-std::shared_ptr<ListValue> formal_params_;
+std::shared_ptr<ListValue> formal_params_; // TODO make this normal list of strings of names
 std::shared_ptr<Value> body_;
 
 public:
@@ -24,8 +26,15 @@ ValueType get_type() const {
 std::string to_string() const override {
   return "#<closure>";
 }
-
-
+ValuePtr get_body() const {
+    return body_;
+}
+EnvironmentPtr get_env() const {
+    return env_;
+}
+std::shared_ptr<ListValue> get_formal_params() const {
+    return formal_params_;
+}
 };
 
 

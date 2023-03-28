@@ -3,7 +3,6 @@
 
 #include <utility>
 
-#include <utility>
 
 
 void Environment::set(const std::string &key, const std::shared_ptr<Value> &value) {
@@ -127,8 +126,68 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
   set("else", std::make_shared<BoolValue>(true));
 
 
+//list: take the parameters and return them as a list.
+  auto list_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > &argv) {
+                 return std::static_pointer_cast<Value>(std::make_shared<ListValue>(argv));
+                   };
+  set("list", std::make_shared<FunctionValue>(list_function_pointer));
+//list?: return true if the first parameter is a list, false otherwise.
+auto list_queston_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > &argv) {
+                 return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::List));
+                   };
+  set("list?", std::make_shared<FunctionValue>(list_queston_function_pointer));
+//empty?: treat the first parameter as a list and return true if the list is empty and false if it contains any elements.
+auto empty_queston_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > &argv) {
+                if (argv[0]->get_type() != ValueType::List) {
+                    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+                }
+                auto list = std::static_pointer_cast<ListValue>(argv[0]);
+                return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(list->size() == 0));
 
-  // TODO: add more functions
+
+                   };
+  set("empty?", std::make_shared<FunctionValue>(empty_queston_function_pointer));
+//count: treat the first parameter as a list and return the number of elements that it contains.
+auto count_function_pointer = [](size_t argc, std::vector<std::shared_ptr<Value> > &argv) {
+                auto list = std::static_pointer_cast<ListValue>(argv[0]);
+                return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(list->size()));
+                   };
+  set("count", std::make_shared<FunctionValue>(count_function_pointer));
+//=: compare the first two parameters and return true if they are the same type and contain the same value. In the case of equal length lists, each element of the list should be compared for equality and if they are the same return true, otherwise false.
+auto eq_function = [](size_t argc, std::vector<std::shared_ptr<Value> > &argv) {
+    //TODO actually implement this
+                if (argv[0]->get_type() != argv[1]->get_type()) {
+                    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+                }
+                if (argv[0]->get_type() == ValueType::Integer) {
+                    auto a = std::static_pointer_cast<IntegerValue>(argv[0]);
+                    auto b = std::static_pointer_cast<IntegerValue>(argv[1]);
+                    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(a->get_value() == b->get_value()));
+                }
+
+
+
+                if (argv[0]->get_type() == ValueType::List) {
+                    auto list1 = std::static_pointer_cast<ListValue>(argv[0]);
+                    auto list2 = std::static_pointer_cast<ListValue>(argv[1]);
+                    if (list1->size() != list2->size()) {
+                        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+                    }
+                    for (int i = 0; i < list1->size(); i++) {
+                        if (list1->get_value(i) != list2->get_value(i)) {
+                            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+                        }
+                    }
+                    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
+                }
+                return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
+                   };
+  set("=", std::make_shared<FunctionValue>(eq_function));
+//<, <=, >, and >=: treat the first two parameters as numbers and do the corresponding numeric comparison, returning either true or false.
+// TODO
+
+
+
   // TODO: solve different types of args
 
 
