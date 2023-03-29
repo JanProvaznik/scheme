@@ -5,11 +5,11 @@
 #include "environment.h"
 #include "util.h"
 #include "datatypes/Closure.h"
+#include "main.h"
 
 
 void run_tests();
 
-ValuePtr eval(const ValuePtr &ast, EnvironmentPtr &env);
 
 std::shared_ptr<Value> eval_ast(const ValuePtr &value, EnvironmentPtr env);
 
@@ -74,6 +74,7 @@ std::shared_ptr<Value> eval_ast(const ValuePtr &value, EnvironmentPtr env) {
 ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
     auto ast = ast_in;
     auto env = env_in;
+    tco:
     while (true) {
         if (ast->get_type() != ValueType::List)
             return eval_ast(ast, env);
@@ -93,9 +94,7 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                     env->set(list_ast->get_value(1)->to_string(), result);
                     return result;
 
-                } else if (symbol_name == "let") {
-                    // this doesn't seem important, for now just use let*
-                } else if (symbol_name == "let*") {
+                } else if (symbol_name == "let*" || symbol_name == "letrec") {
 
                     //   create a new environment using the current environment as the outer value and then use the first parameter as a list_ast of new bindings in the "let*" environment.
                     //   Take the second element of the binding list_ast, call EVAL using the new "let*" environment as the evaluation environment,
@@ -125,7 +124,6 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                     env = new_env;
                     continue;
 //                    return eval(body->get_value(body->size() - 1), new_env); // TCO
-
 
                 } else if (symbol_name == "quote") {
 //            return list_ast->get_value(1);
@@ -181,7 +179,45 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                         ast = car<Value>(cdr(cdr(cdr(list_ast))));
                         continue; //tco
                     }
+                } else if (symbol_name == "do") {
+
+                } else if (symbol_name == "cond"){
+//                    Each 〈clause〉 should be of the form
+//                            (〈test〉 〈expression〉 . . . )
+//                    where 〈test〉 is any expression. The last 〈clause〉 may be
+//                    an “else clause,” which has the form
+//                            (else 〈expression1〉 〈expression2〉 . . . ).
+//                    Semantics: A cond expression is evaluated by evaluating
+//                    the 〈test〉 expressions of successive 〈clause〉s in order until
+//                    one of them evaluates to a true value (see section 6.1).
+//                    When a 〈test〉 evaluates to a true value, then the remaining
+//                    〈expression〉s in its 〈clause〉 are evaluated in order, and the
+//                    result of the last 〈expression〉 in the 〈clause〉 is returned
+//                    as the result of the entire cond expression. If the selected
+                      auto clauses = cdr(list_ast);
+                    for (int i = 0; i < clauses->size(); ++i) {
+                        auto clause = std::static_pointer_cast<ListValue>(clauses->get_value(i));
+                        auto test = car<Value>(clause);
+                        // evaluate test
+                        if (eval(test, env)->is_true()){
+                            if (clause->size() == 1){return std::make_shared<BoolValue>(true);}
+                            auto exprs = cdr(clause);
+                            for (int j = 0; j < exprs->size()-1; ++j) {
+                                eval(exprs->get_value(j), env);
+
+                            }
+                            ast = exprs->get_value(exprs->size()-1);
+//                            continue; actually tco
+                            goto tco;
+                        }
+
+
+                    }
+
+
+
                 }
+
 
 
             }

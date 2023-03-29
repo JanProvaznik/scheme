@@ -9,7 +9,7 @@
 enum class ValueType {
   List,
   Pair,
-  String, Bool, Integer, Float, Function, Symbol, Nil, Closure
+  String, Bool, Integer, Float, Function, Symbol, Nil, Closure, Environment
 };
 
 
@@ -80,6 +80,12 @@ void add_value(const std::shared_ptr<Value> &value);
 std::shared_ptr<Value> get_value(size_t index) const;
 
 size_t size() const;
+
+void insert_value(size_t index, const std::shared_ptr<Value> &value);
+void set_value(size_t index, const std::shared_ptr<Value> &value);
+void pop_back();
+
+
 };
 
 class SymbolValue : public Value {

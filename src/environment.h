@@ -10,13 +10,13 @@
 #include <iostream>
 
 
-class Environment {
+class Environment : public Value {
 public:
 void set(const std::string &key, const std::shared_ptr<Value> &value);
-Environment() : outer(nullptr) {
+Environment() : Value(ValueType::Environment), outer(nullptr) {
 }
 
-explicit Environment(std::shared_ptr<Environment> outer) : outer(outer) {
+explicit Environment(std::shared_ptr<Environment> outer) : Value(ValueType::Environment), outer(outer) {
 }
 
 Environment(std::shared_ptr<Environment> outer, const std::shared_ptr<ListValue>& binds, const std::shared_ptr<ListValue>& exprs);

@@ -25,16 +25,16 @@ parse to AST,
 - lexing
 - parsing
 - eval
-- basic environment
+- environment
+- tail call optimization
+- lambda, let, set!
+- library functions
+- if, cond
 
 
 # TODO
-- library functions
-- lambda, let, set!
-- if, cond
-- quote, quasiquote, unquote, unquote-splicing
-- tail call optimization
 - tests that are automated and have good coverage
+- quote
 - error checking
 ## maybe
 - character constatnts #\
