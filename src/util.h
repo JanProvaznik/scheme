@@ -1,13 +1,9 @@
-//
-// Created by janpro on 26.03.23.
-//
-
 #ifndef SCHEME_UTIL_H
 #define SCHEME_UTIL_H
 
 #include <memory>
 #include <string>
-#include "environment.h"
+#include "datatypes/environment.h"
 #include "datatypes/types.h"
 
 using EnvironmentPtr = std::shared_ptr<Environment>;

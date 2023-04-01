@@ -2,14 +2,13 @@
 #include <memory>
 #include <iostream>
 #include <vector>
+#include <functional>
 
 #ifndef SCHEME_TYPES_H
 #define SCHEME_TYPES_H
 
 enum class ValueType {
-  List,
-  Pair,
-  String, Bool, Integer, Float, Function, Symbol, Nil, Closure, Environment
+  List, String, Bool, Integer, Float, Function, Symbol, Nil, Closure, Environment
 };
 
 
@@ -51,22 +50,8 @@ void print() const {
 
 };
 
-//class PairValue : public Value {
-//    std::shared_ptr<Value> car;
-//    std::shared_ptr<Value> cdr;
-//public:
-//    PairValue(std::shared_ptr<Value> car, std::shared_ptr<Value> cdr) : Value(ValueType::List), car(car), cdr(cdr) {
-//    }
-//
-//    std::string to_string() const override;
-//
-//    void set_car(std::shared_ptr<Value> car);
-//
-//    void set_cdr(std::shared_ptr<Value> cdr);
-//};
-
 class ListValue : public Value {
-std::vector<std::shared_ptr<Value> > values;
+std::vector<std::shared_ptr<Value>> values;
 public:
 ListValue() : Value(ValueType::List), values() {
 }
@@ -80,7 +65,8 @@ void add_value(const std::shared_ptr<Value> &value);
 std::shared_ptr<Value> get_value(size_t index) const;
 
 size_t size() const;
-
+// get_sublist
+std::shared_ptr<ListValue> get_sublist(size_t start) const;
 void insert_value(size_t index, const std::shared_ptr<Value> &value);
 void set_value(size_t index, const std::shared_ptr<Value> &value);
 void pop_back();
@@ -92,6 +78,9 @@ class SymbolValue : public Value {
 std::string value;
 public:
 SymbolValue(std::string value) : Value(ValueType::Symbol), value(std::move(value)) {
+for (auto &c : this->value) {
+  c = std::tolower(c);
+}
 }
 
 std::string to_string() const override;
@@ -104,7 +93,9 @@ NumberValue(ValueType type) : Value(type) {
 };
 
 // don't use raw pointers but shared pointers
-using FunctionSharedPointer = std::shared_ptr<Value> (*)(size_t, std::vector<std::shared_ptr<Value> > &);
+//using FunctionSharedPointer = std::shared_ptr<Value> (*)(size_t, std::vector<std::shared_ptr<Value> > &);
+using FunctionSharedPointer = std::function<std::shared_ptr<Value>(size_t, std::vector<std::shared_ptr<Value>>&)>;
+// with
 
 class FunctionValue : public Value {
 public:

@@ -3,7 +3,7 @@
 
 
 #include "types.h"
-#include "../environment.h"
+#include "environment.h"
 #include "../util.h"
 #include <vector>
 #include <string>

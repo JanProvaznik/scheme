@@ -1,9 +1,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <string>
 #include <iostream>
-#include <utility>
 #include "reader.h"
 
 
@@ -88,8 +86,6 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
     return pair;
   }
   // numbers
-  // TODO: consider handling weird representations such as hex
-
   if (std::isdigit(source[pos]) || source[pos] == '-') {
     // find the end of the number
     size_t end = pos;
@@ -206,7 +202,12 @@ std::shared_ptr<Value> Reader::read_form(Tokenizer &tokenizer) {
   auto top_token = tokenizer.peek_token();
   if (top_token.first == TOKEN_TYPE::LPAREN) {
     return read_list(tokenizer);
-  } else {
+  } else if (top_token.first == TOKEN_TYPE::QUOTE) {
+      return read_quoted_list(tokenizer);
+
+  }
+
+  else {
     return read_atom(tokenizer);
   }
 }
@@ -228,6 +229,17 @@ std::shared_ptr<ListValue> Reader::read_list(Tokenizer &tokenizer) {
   }
   return list;
 }
+std::shared_ptr<ListValue> Reader::read_quoted_list(Tokenizer &tokenizer) {
+    // create a List object
+    std::shared_ptr<ListValue> list = std::make_shared<ListValue>();
+    tokenizer.next_token();
+    list->add_value(std::make_shared<SymbolValue>("quote"));
+    auto actual_list = read_list(tokenizer);
+    list->add_value(actual_list);
+    return list;
+}
+
+
 
 std::shared_ptr<Value> Reader::read_atom(Tokenizer &tokenizer) {
   if (tokenizer.peek_token().first == TOKEN_TYPE::INTEGER) {

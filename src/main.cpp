@@ -2,7 +2,7 @@
 #include <string>
 #include "reader.h"
 #include "printer.h"
-#include "environment.h"
+#include "datatypes/environment.h"
 #include "util.h"
 #include "datatypes/Closure.h"
 #include "main.h"
@@ -49,10 +49,6 @@ ValuePtr Closure::call(const std::vector<ValuePtr> &args) {
         eval(body_list->get_value(i), new_env);
     }
     return eval(body_list->get_value(body_list->size() - 1), new_env);
-}
-
-// precondition: the list is nonempty and evaluated
-ValuePtr eval_list(std::shared_ptr<ListValue> list, EnvironmentPtr env) {
 }
 
 std::shared_ptr<Value> eval_ast(const ValuePtr &value, EnvironmentPtr env) {
@@ -126,7 +122,7 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
 //                    return eval(body->get_value(body->size() - 1), new_env); // TCO
 
                 } else if (symbol_name == "quote") {
-//            return list_ast->get_value(1);
+                    return list_ast->get_value(1);
                 } else if (symbol_name == "lambda") {
 //                lambda: Return a new function closure. The body of that closure does the following:
 //                1. Create a new environment using env (closed over from outer scope) as the outer parameter,
@@ -288,7 +284,12 @@ ValuePtr read() {
 }
 
 void rep(EnvironmentPtr &env) {
+//try{
     print(*eval(read(), env));
+//    } catch (std::exception &e) {
+//        std::cout << e.what() << std::endl;
+//    }
+
 
 }
 
@@ -323,7 +324,6 @@ int main(int argc, char const *argv[]) {
 
     return 0;
 }
-// I can't get the tests to work in their directory, so they are going to be here for now
 
 void test_complex();
 

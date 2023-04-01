@@ -1,8 +1,9 @@
 #ifndef SCHEME_ENVIRONMENT_H
 #define SCHEME_ENVIRONMENT_H
 
-#include "printer.h"
-#include "reader.h"
+#include "../printer.h"
+#include "../reader.h"
+//#include "types.h"
 #include <string>
 #include <sstream>
 #include <fstream>

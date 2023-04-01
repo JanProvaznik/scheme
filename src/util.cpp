@@ -1,8 +1,5 @@
 #include "util.h"
 
-
-
-
 ListPtr cons(const ValuePtr &value, const ListPtr &list) {
   auto result = std::make_shared<ListValue>();
   result->add_value(value);
@@ -26,11 +23,3 @@ ListPtr cdr(const ValuePtr &list) {
   }
   return result;
 }
-
-
-//std::vector special_forms = {
-//        "let",
-//        "let*",
-//        "define",
-//        "set!",
-//};

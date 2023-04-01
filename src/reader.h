@@ -38,7 +38,6 @@ std::string source;
 size_t pos;
 };
 
-// takes a string tokenizes it
 class Reader
 {
 std::shared_ptr<ListValue> read_list(Tokenizer& tokenizer);
@@ -47,5 +46,7 @@ static std::shared_ptr<Value> read_atom(Tokenizer& tokenizer);
 public:
 
 std::shared_ptr<Value> read_form(Tokenizer &tokenizer);
+
+std::shared_ptr<ListValue> read_quoted_list(Tokenizer &tokenizer);
 };
 #endif // TOKENIZER_H
