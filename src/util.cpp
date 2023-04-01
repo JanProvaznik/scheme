@@ -1,15 +1,9 @@
+#include "datatypes/types.h"
 #include "util.h"
+#include <algorithm>
 
-ListPtr cons(const ValuePtr &value, const ListPtr &list) {
-    auto result = std::make_shared<ListValue>();
-    result->add_value(value);
-    for (size_t i = 0; i < list->size(); i++) {
-        result->add_value(list->get_value(i));
-    }
-    return result;
-}
 
-void throw_on_bad_arity(std::string &name, size_t expected, size_t actual) {
+void check_arity(std::string &name, size_t expected, size_t actual) {
     if (expected != actual) {
         throw std::runtime_error("Expected " + std::to_string(expected) + " arguments, got " + std::to_string(actual));
     }
@@ -22,4 +16,23 @@ ListPtr cdr(const ValuePtr &list) {
         result->add_value(list_value->get_value(i));
     }
     return result;
+}
+
+bool check_signature(const std::vector<ValuePtr> &argv, const std::vector<ValueType> &types) {
+    if (argv.size() != types.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < argv.size(); i++) {
+        if (argv[i]->get_type() != types[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+bool check_numeric_types(const std::vector<ValuePtr> &argv) {
+     return std::all_of(argv.begin(), argv.end(), [](const ValuePtr &arg) {
+         return arg->get_type() == ValueType::Integer || arg->get_type() == ValueType::Float;
+     });
 }

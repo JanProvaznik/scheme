@@ -1,12 +1,16 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
+#include "util.h"
 #include <string>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <utility>
 #include "datatypes/types.h"
+
+std::shared_ptr<Value> read_file(const std::string &path);
+std::shared_ptr<Value> read_stdin();
 
 enum class TOKEN_TYPE {
     LPAREN,
@@ -48,7 +52,7 @@ public:
 
     std::shared_ptr<Value> read_form(Tokenizer &tokenizer);
 
-    std::shared_ptr<ListValue> read_quoted_list(Tokenizer &tokenizer);
+    std::shared_ptr<ListValue> read_quoted_form(Tokenizer &tokenizer);
 };
 
 #endif // TOKENIZER_H

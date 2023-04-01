@@ -3,13 +3,11 @@
 
 #include "../printer.h"
 #include "../reader.h"
-//#include "types.h"
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <map>
 #include <iostream>
-
 
 class Environment : public Value {
 public:

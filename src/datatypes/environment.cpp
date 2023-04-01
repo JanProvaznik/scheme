@@ -1,6 +1,5 @@
-#include "../util.h"
-#include "../main.h"
-#include "Closure.h"
+#include "../evaluator.h"
+#include "closure.h"
 #include "types.h"
 #include "environment.h"
 
@@ -61,6 +60,11 @@ EnvironmentPtr Environment::get_outer() const {
 BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     auto make_arithmetic_function = [](auto operation) {
         return [operation](size_t argc, std::vector<ValuePtr> &argv) {
+            if (!check_signature(argv, {ValueType::Integer, ValueType::Integer}) && !check_signature(argv, {ValueType::Float, ValueType::Float}) && !check_signature(argv, {ValueType::Integer, ValueType::Float}) && !check_signature(argv, {ValueType::Float, ValueType::Integer}))
+            {
+                throw std::runtime_error("Invalid argument types, this is only a numeric operator.");
+            }
+
             if (argv[0]->get_type() == ValueType::Float || argv[1]->get_type() == ValueType::Float) {
                 double result = operation(argv[0]->to_double(), argv[1]->to_double());
                 return std::static_pointer_cast<Value>(std::make_shared<FloatValue>(result));
@@ -83,6 +87,13 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("nil", std::make_shared<NilValue>());
     set("else", std::make_shared<BoolValue>(true));
 
+    auto write_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        for (auto &arg : argv) {
+            std::cout << arg->to_string();
+        }
+        return std::static_pointer_cast<Value>(std::make_shared<NilValue>());
+    };
+    set("write", std::make_shared<FunctionValue>(write_function_pointer));
 
 //list: take the parameters and return them as a list.
     auto list_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
@@ -90,10 +101,10 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     };
     set("list", std::make_shared<FunctionValue>(list_function_pointer));
 //list?: return true if the first parameter is a list, false otherwise.
-    auto list_queston_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+    auto list_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::List));
     };
-    set("list?", std::make_shared<FunctionValue>(list_queston_function_pointer));
+    set("list?", std::make_shared<FunctionValue>(list_question_function_pointer));
 //empty?: treat the first parameter as a list and return true if the list is empty and false if it contains any elements.
     auto empty_queston_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         if (argv[0]->get_type() != ValueType::List) {
@@ -107,6 +118,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("empty?", std::make_shared<FunctionValue>(empty_queston_function_pointer));
 //count: treat the first parameter as a list and return the number of elements that it contains.
     auto count_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+
         auto list = std::static_pointer_cast<ListValue>(argv[0]);
         return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(list->size()));
     };
@@ -244,7 +256,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("concat", std::make_shared<FunctionValue>(concat_function_pointer));
 
 
-    auto number_comparison_function = [](auto &comparison, size_t argc, std::vector<ValuePtr> &argv) {
+    auto number_comparison_function = [](const auto &comparison, size_t argc, std::vector<ValuePtr> &argv) {
         auto n = argv[0]->to_double();
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(comparison(n)));
     };
@@ -325,14 +337,14 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("pair?", std::make_shared<FunctionValue>(pair_queston_function_pointer));
 
 // car
-    auto car_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+    auto car_function_pointer = [](size_t argc, const std::vector<ValuePtr> &argv) {
         return car<Value>(argv[0]);
     };
     set("car", std::make_shared<FunctionValue>(car_function_pointer));
 
 
 // cdr
-    auto cdr_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+    auto cdr_function_pointer = [](size_t argc, const std::vector<ValuePtr> &argv) {
         return std::static_pointer_cast<Value>(cdr(argv[0]));
     };
     set("cdr", std::make_shared<FunctionValue>(cdr_function_pointer));
@@ -369,12 +381,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("null?", std::make_shared<FunctionValue>(null_question_function_pointer));
 
 // length
-    auto length_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-        auto list = std::static_pointer_cast<ListValue>(argv[0]);
-        return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(list->size()));
-    };
-
-    set("length", std::make_shared<FunctionValue>(length_function_pointer));
+    set("length", std::make_shared<FunctionValue>(count_function_pointer));
 
 // append
     set("append", std::make_shared<FunctionValue>(concat_function_pointer));
@@ -473,7 +480,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("string>=?", std::make_shared<FunctionValue>(string_greater_than_or_equal_question_function_pointer));
 
 // vectors are lists, easy
-    set("vector?", std::make_shared<FunctionValue>(list_queston_function_pointer));
+    set("vector?", std::make_shared<FunctionValue>(list_question_function_pointer));
 
     //make-vector (size), makes a vector with nils
     auto make_vector_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
@@ -487,7 +494,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 // vector obj...
     set("make-vector", std::make_shared<FunctionValue>(make_vector_function_pointer));
 // vector-length
-    set("vector-length", std::make_shared<FunctionValue>(length_function_pointer));
+    set("vector-length", std::make_shared<FunctionValue>(count_function_pointer));
 
 // vector-ref
     auto vector_ref_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
@@ -508,7 +515,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("vector-set!", std::make_shared<FunctionValue>(vector_set_bang_function_pointer));
 // vector->list
 // list->vector just identity
-    auto vector_to_list_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+    auto vector_to_list_function_pointer = [](size_t argc, const std::vector<ValuePtr> &argv) {
         return argv[0];
     };
     set("vector->list", std::make_shared<FunctionValue>(vector_to_list_function_pointer));
@@ -523,19 +530,19 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 
 // map
     auto map_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-        auto list = std::static_pointer_cast<ListValue>(argv[0]);
-        // it's a function or a closure
+        auto list = std::static_pointer_cast<ListValue>(argv[1]);
+        // it's a function or a Closure
         if (argv[1]->get_type() == ValueType::Function) {
-            auto func = std::static_pointer_cast<FunctionValue>(argv[1]);
+            auto func = std::static_pointer_cast<FunctionValue>(argv[0]);
             auto newlist = std::make_shared<ListValue>();
             for (int i = 0; i < list->size(); i++) {
                 std::vector<ValuePtr> args;
                 args.push_back(list->get_value(i));
-                newlist->add_value(apply(func, args));
+                newlist->add_value(apply_fn(func, args));
             }
             return std::static_pointer_cast<Value>(newlist);
         }
-        auto closure = std::static_pointer_cast<Closure>(argv[1]);
+        auto closure = std::static_pointer_cast<Closure>(argv[0]);
         auto newlist = std::make_shared<ListValue>();
         for (int i = 0; i < list->size(); i++) {
             std::vector<ValuePtr> args;
@@ -549,18 +556,18 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 
 // for-each
     auto for_each_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-        auto list = std::static_pointer_cast<ListValue>(argv[0]);
-        // it's a function or a closure
+        auto list = std::static_pointer_cast<ListValue>(argv[1]);
+        // it's a function or a Closure
         if (argv[1]->get_type() == ValueType::Function) {
-            auto func = std::static_pointer_cast<FunctionValue>(argv[1]);
+            auto func = std::static_pointer_cast<FunctionValue>(argv[0]);
             for (int i = 0; i < list->size(); i++) {
                 std::vector<ValuePtr> args;
                 args.push_back(list->get_value(i));
-                apply(func, args);
+                apply_fn(func, args);
             }
             return std::static_pointer_cast<Value>(std::make_shared<NilValue>());
         }
-        auto closure = std::static_pointer_cast<Closure>(argv[1]);
+        auto closure = std::static_pointer_cast<Closure>(argv[0]);
         for (int i = 0; i < list->size(); i++) {
             std::vector<ValuePtr> args;
             args.push_back(list->get_value(i));
@@ -571,7 +578,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("for-each", std::make_shared<FunctionValue>(for_each_function_pointer));
 
 
-    auto eq_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+    auto eq_question_function_pointer = [](size_t argc, const std::vector<ValuePtr> &argv) {
         // just compare if the pointers point to the same thing
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
 
@@ -624,15 +631,12 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     };
     set("equal?", std::make_shared<FunctionValue>(equal_question_function_pointer));
 
-// TODO (memq obj list)
-// TODO (memv obj list)
-// TODO (member obj list)
 //    These procedures return the first sublist of list whose car
 //    is obj . If obj does not occur in list, #f (n.b.: not the empty
 //    list) is returned. Memq uses eq? to compare obj with the
 //    elements of list, while memv uses eqv? and member uses
 //    equal?
-    auto generic_member_function = [](auto &comparison_function, size_t argc, std::vector<ValuePtr> &argv) {
+    auto generic_member_function = [](const auto &comparison_function, size_t argc, const std::vector<ValuePtr> &argv) {
         auto list = std::static_pointer_cast<ListValue>(argv[1]);
         for (int i = 0; i < list->size(); i++) {
             auto val = list->get_value(i);
@@ -668,7 +672,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 //    #f is returned. Assq uses eq? to compare obj with the car
 //    fields of the pairs in alist, while assv uses eqv? and assoc
 //    uses equal?
-    auto generic_assoc_function = [](auto &comparison_function, size_t argc, std::vector<ValuePtr> &argv) {
+    auto generic_assoc_function = [](const auto &comparison_function, size_t argc, const std::vector<ValuePtr> &argv) {
         auto list = std::static_pointer_cast<ListValue>(argv[1]);
         for (int i = 0; i < list->size(); i++) {
             auto val = list->get_value(i);

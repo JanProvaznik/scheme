@@ -1,3 +1,5 @@
+#include "util.h"
+#include "printer.h"
 #include <string>
 #include <utility>
 #include <vector>
@@ -203,7 +205,7 @@ std::shared_ptr<Value> Reader::read_form(Tokenizer &tokenizer) {
     if (top_token.first == TOKEN_TYPE::LPAREN) {
         return read_list(tokenizer);
     } else if (top_token.first == TOKEN_TYPE::QUOTE) {
-        return read_quoted_list(tokenizer);
+        return read_quoted_form(tokenizer);
 
     } else {
         return read_atom(tokenizer);
@@ -214,13 +216,13 @@ std::shared_ptr<ListValue> Reader::read_list(Tokenizer &tokenizer) {
     // create a List object
     std::shared_ptr<ListValue> list = std::make_shared<ListValue>();
     while (true) {
-        // read the next token
+        // read_stdin the next token
         auto token = tokenizer.next_token();
         // check if we have reached the end of the list
         if (token.first == TOKEN_TYPE::RPAREN) {
             break;
         }
-        // read the next form
+        // read_stdin the next form
         auto form = read_form(tokenizer);
         list->add_value(form);
         // add the form to the list
@@ -228,13 +230,13 @@ std::shared_ptr<ListValue> Reader::read_list(Tokenizer &tokenizer) {
     return list;
 }
 
-std::shared_ptr<ListValue> Reader::read_quoted_list(Tokenizer &tokenizer) {
+std::shared_ptr<ListValue> Reader::read_quoted_form(Tokenizer &tokenizer) {
     // create a List object
     std::shared_ptr<ListValue> list = std::make_shared<ListValue>();
     tokenizer.next_token();
     list->add_value(std::make_shared<SymbolValue>("quote"));
-    auto actual_list = read_list(tokenizer);
-    list->add_value(actual_list);
+    auto form = read_form(tokenizer);
+    list->add_value(form);
     return list;
 }
 
@@ -267,4 +269,28 @@ std::shared_ptr<Value> Reader::read_atom(Tokenizer &tokenizer) {
     } else {
         throw std::runtime_error("unknown token");
     }
+}
+
+std::shared_ptr<Value> read_file(const std::string &path) {
+    std::ifstream file(path);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    // tokenize source
+    Tokenizer tokenizer(buffer.str());
+    // parse tokens into ast
+    Reader reader;
+    return reader.read_form(tokenizer);
+
+
+}
+
+ValuePtr read_stdin() {
+    // read_stdin source and return a list of tokens
+    std::string line;
+    std::getline(std::cin, line);
+    // tokenize source
+    Tokenizer tokenizer(line);
+    // parse tokens into ast
+    Reader reader;
+    return reader.read_form(tokenizer);
 }

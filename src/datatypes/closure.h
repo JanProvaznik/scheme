@@ -26,7 +26,7 @@ public:
     }
 
     std::string to_string() const override {
-        return "#<closure>";
+        return "#<Closure>";
     }
 
     ValuePtr get_body() const {

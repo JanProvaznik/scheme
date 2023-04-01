@@ -20,9 +20,8 @@ std::shared_ptr<T> car(const ValuePtr &list) {
 
 ListPtr cdr(const ValuePtr &list);
 
-ListPtr cons(const ValuePtr &value, const ListPtr &list);
 
-void throw_on_bad_arity(std::string &name, size_t expected, size_t actual);
+bool check_signature(const std::vector<ValuePtr> &argv, const std::vector<ValueType> &types);
 
 
 #endif //SCHEME_UTIL_H
