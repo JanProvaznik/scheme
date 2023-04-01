@@ -109,7 +109,8 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                         // rewrite this line with car and cdr
 //                    auto second_param = std::static_pointer_cast<ListValue>(bindings_list->get_value(i))->get_value(1);
                         auto second_param = cdr(bindings_list->get_value(i))->get_value(0);
-                        auto value = eval(second_param, new_env);                     //TODO check if eval is right
+                        auto value = eval(second_param,
+                                          new_env);                                 //TODO check if eval is right
                         new_env->set(name->to_string(), value);
                     }
                     // many expressions can follow the bindings
@@ -170,14 +171,14 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                     auto test = eval(car<Value>(cdr(list_ast)), env);
                     if (test->is_true()) {
                         ast = car<Value>(cdr(cdr(list_ast)));
-                        continue; //tco
+                        continue;             //tco
                     } else {
                         ast = car<Value>(cdr(cdr(cdr(list_ast))));
-                        continue; //tco
+                        continue;             //tco
                     }
                 } else if (symbol_name == "do") {
 
-                } else if (symbol_name == "cond"){
+                } else if (symbol_name == "cond") {
 //                    Each 〈clause〉 should be of the form
 //                            (〈test〉 〈expression〉 . . . )
 //                    where 〈test〉 is any expression. The last 〈clause〉 may be
@@ -190,19 +191,19 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
 //                    〈expression〉s in its 〈clause〉 are evaluated in order, and the
 //                    result of the last 〈expression〉 in the 〈clause〉 is returned
 //                    as the result of the entire cond expression. If the selected
-                      auto clauses = cdr(list_ast);
+                    auto clauses = cdr(list_ast);
                     for (int i = 0; i < clauses->size(); ++i) {
                         auto clause = std::static_pointer_cast<ListValue>(clauses->get_value(i));
                         auto test = car<Value>(clause);
                         // evaluate test
-                        if (eval(test, env)->is_true()){
-                            if (clause->size() == 1){return std::make_shared<BoolValue>(true);}
+                        if (eval(test, env)->is_true()) {
+                            if (clause->size() == 1) { return std::make_shared<BoolValue>(true); }
                             auto exprs = cdr(clause);
-                            for (int j = 0; j < exprs->size()-1; ++j) {
+                            for (int j = 0; j < exprs->size() - 1; ++j) {
                                 eval(exprs->get_value(j), env);
 
                             }
-                            ast = exprs->get_value(exprs->size()-1);
+                            ast = exprs->get_value(exprs->size() - 1);
 //                            continue; actually tco
                             goto tco;
                         }
@@ -211,9 +212,7 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                     }
 
 
-
                 }
-
 
 
             }
@@ -259,7 +258,7 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
                 }
 // last expression in body
                 ast = body_list->get_value(body_list->size() - 1);
-                continue; //tco
+                continue;         //tco
 //                    return closure->call(args);
 
             } else {
@@ -268,7 +267,7 @@ ValuePtr eval(const ValuePtr &ast_in, EnvironmentPtr &env_in) {
 
             }
         }
-    }// end while loop
+    }  // end while loop
 }
 
 

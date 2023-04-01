@@ -13,27 +13,29 @@
 
 class Environment : public Value {
 public:
-void set(const std::string &key, const std::shared_ptr<Value> &value);
-Environment() : Value(ValueType::Environment), outer(nullptr) {
-}
+    void set(const std::string &key, const std::shared_ptr<Value> &value);
 
-explicit Environment(std::shared_ptr<Environment> outer) : Value(ValueType::Environment), outer(outer) {
-}
+    Environment() : Value(ValueType::Environment), outer(nullptr) {
+    }
 
-Environment(std::shared_ptr<Environment> outer, const std::shared_ptr<ListValue>& binds, const std::shared_ptr<ListValue>& exprs);
+    explicit Environment(std::shared_ptr<Environment> outer) : Value(ValueType::Environment), outer(outer) {
+    }
+
+    Environment(std::shared_ptr<Environment> outer, const std::shared_ptr<ListValue> &binds,
+                const std::shared_ptr<ListValue> &exprs);
 
 
-std::shared_ptr<Value> get(const std::string &key) const;
+    std::shared_ptr<Value> get(const std::string &key) const;
 
-std::shared_ptr<Environment> find(const std::string &key);
+    std::shared_ptr<Environment> find(const std::string &key);
 
-std::shared_ptr<Environment> get_outer() const;
+    std::shared_ptr<Environment> get_outer() const;
 
-void update_existing(const std::string &key, const std::shared_ptr<Value> &value);
+    void update_existing(const std::string &key, const std::shared_ptr<Value> &value);
 
 protected:
-std::map<std::string, std::shared_ptr<Value> > data;
-std::shared_ptr<Environment> outer;
+    std::map<std::string, std::shared_ptr<Value> > data;
+    std::shared_ptr<Environment> outer;
 
 
 };
@@ -41,7 +43,7 @@ std::shared_ptr<Environment> outer;
 class BaseEnvironment : public Environment {
 
 public:
-BaseEnvironment();
+    BaseEnvironment();
 };
 
 #endif //SCHEME_ENVIRONMENT_H

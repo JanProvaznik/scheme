@@ -1,15 +1,15 @@
 #include "types.h"
 
 void ListValue::add_value(const std::shared_ptr<Value> &value) {
-  values.push_back(value);
+    values.push_back(value);
 }
 
 std::shared_ptr<Value> ListValue::get_value(size_t index) const {
-  return values[index];
+    return values[index];
 }
 
 size_t ListValue::size() const {
-  return values.size();
+    return values.size();
 }
 
 void ListValue::insert_value(size_t index, const std::shared_ptr<Value> &value) {
@@ -34,5 +34,5 @@ std::shared_ptr<ListValue> ListValue::get_sublist(size_t start) const {
 }
 
 IntegerValue::IntegerValue(std::int64_t value) : NumberValue(ValueType::Integer) {
-  this->value = value;
+    this->value = value;
 }

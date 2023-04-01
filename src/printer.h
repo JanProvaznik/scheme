@@ -4,7 +4,7 @@
 
 #include "datatypes/types.h"
 
-void print(Value & value);
+void print(Value &value);
 
 
 #endif //SCHEME_PRINTER_H

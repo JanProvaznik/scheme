@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <memory>
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <functional>
 
@@ -8,177 +9,182 @@
 #define SCHEME_TYPES_H
 
 enum class ValueType {
-  List, String, Bool, Integer, Float, Function, Symbol, Nil, Closure, Environment
+    List, String, Bool, Integer, Float, Function, Symbol, Nil, Closure, Environment
 };
 
 
 class Value {
 protected:
-ValueType type;
-std::string name;
+    ValueType type;
+    std::string name;
 public:
-Value(ValueType type) : type(type) {
-}
+    explicit Value(ValueType type) : type(type) {
+    }
 
-virtual ~Value() {
-}
+    virtual ~Value() = default;
 
-virtual double to_double() const {
-  return 0;
-}
+    [[nodiscard]] virtual double to_double() const {
+        return 0;
+    }
 
-std::string get_name() const {
-  return name;
-}
+    [[nodiscard]] std::string get_name() const {
+        return name;
+    }
 
-ValueType get_type() const {
-  return type;
-}
+    [[nodiscard]] ValueType get_type() const {
+        return type;
+    }
 
-virtual bool is_true() const {
-  return false;
-}
+    [[nodiscard]] virtual bool is_true() const {
+        return false;
+    }
 
 
-virtual std::string to_string() const {
-  return "abstract value";
-};
+    [[nodiscard]] virtual std::string to_string() const {
+        return "abstract value";
+    };
 
-void print() const {
-  std::cout << to_string() << std::endl;
-}
+    void print() const {
+        std::cout << to_string() << std::endl;
+    }
 
 };
 
 class ListValue : public Value {
-std::vector<std::shared_ptr<Value>> values;
+    std::vector<std::shared_ptr<Value> > values;
 public:
-ListValue() : Value(ValueType::List), values() {
-}
-ListValue(std::vector<std::shared_ptr<Value> > values) : Value(ValueType::List), values(std::move(values)) {
-}
+    ListValue() : Value(ValueType::List), values() {
+    }
 
-std::string to_string() const override;
+    explicit ListValue(std::vector<std::shared_ptr<Value> > values) : Value(ValueType::List),
+                                                                      values(std::move(values)) {
+    }
 
-void add_value(const std::shared_ptr<Value> &value);
+    [[nodiscard]] std::string to_string() const override;
 
-std::shared_ptr<Value> get_value(size_t index) const;
+    void add_value(const std::shared_ptr<Value> &value);
 
-size_t size() const;
+    [[nodiscard]] std::shared_ptr<Value> get_value(size_t index) const;
+
+    [[nodiscard]] size_t size() const;
+
 // get_sublist
-std::shared_ptr<ListValue> get_sublist(size_t start) const;
-void insert_value(size_t index, const std::shared_ptr<Value> &value);
-void set_value(size_t index, const std::shared_ptr<Value> &value);
-void pop_back();
+    [[nodiscard]] std::shared_ptr<ListValue> get_sublist(size_t start) const;
+
+    void insert_value(size_t index, const std::shared_ptr<Value> &value);
+
+    void set_value(size_t index, const std::shared_ptr<Value> &value);
+
+    void pop_back();
 
 
 };
 
 class SymbolValue : public Value {
-std::string value;
+    std::string value;
 public:
-SymbolValue(std::string value) : Value(ValueType::Symbol), value(std::move(value)) {
-for (auto &c : this->value) {
-  c = std::tolower(c);
-}
-}
+    explicit SymbolValue(std::string value) : Value(ValueType::Symbol), value(std::move(value)) {
+        for (auto &c: this->value) {
+            c = std::tolower(c);
+        }
+    }
 
-std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
 };
 
 class NumberValue : public Value {
 protected:
-NumberValue(ValueType type) : Value(type) {
-}
+    explicit NumberValue(ValueType type) : Value(type) {
+    }
 };
 
 // don't use raw pointers but shared pointers
 //using FunctionSharedPointer = std::shared_ptr<Value> (*)(size_t, std::vector<std::shared_ptr<Value> > &);
-using FunctionSharedPointer = std::function<std::shared_ptr<Value>(size_t, std::vector<std::shared_ptr<Value>>&)>;
+using FunctionSharedPointer = std::function<std::shared_ptr<Value>(size_t, std::vector<std::shared_ptr<Value> > &)>;
 // with
 
 class FunctionValue : public Value {
 public:
-explicit FunctionValue(FunctionSharedPointer function) : Value(ValueType::Function), function(function) {
-}
+    explicit FunctionValue(FunctionSharedPointer function) : Value(ValueType::Function), function(std::move(function)) {
+    }
 
-FunctionSharedPointer get_function() const {
-  return function;
-}
+    [[nodiscard]] FunctionSharedPointer get_function() const {
+        return function;
+    }
 
-std::string to_string() const;
+    [[nodiscard]] std::string to_string() const override;
 
 private:
-FunctionSharedPointer function{nullptr};
+    FunctionSharedPointer function{nullptr};
 
 };
 
 class IntegerValue : public NumberValue {
-std::int64_t value;
+    std::int64_t value;
 public:
-explicit IntegerValue(std::int64_t value);
+    explicit IntegerValue(std::int64_t value);
 
-std::int64_t get_value() const {
-  return value;
-}
+    [[nodiscard]] std::int64_t get_value() const {
+        return value;
+    }
 
-double to_double() const override {
-  return value;
-}
+    [[nodiscard]] double to_double() const override {
+        return value;
+    }
 
 
-std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
 };
 
 class FloatValue : public NumberValue {
-double value;
+    double value;
 public:
-FloatValue(double value) : NumberValue(ValueType::Float) {
-  this->value = value;
-}
+    explicit FloatValue(double value) : NumberValue(ValueType::Float) {
+        this->value = value;
+    }
 
-double get_value() const {
-  return value;
-}
+    [[nodiscard]] double get_value() const {
+        return value;
+    }
 
-double to_double() const override {
-  return value;
-}
+    [[nodiscard]] double to_double() const override {
+        return value;
+    }
 
 
-std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
 };
 
 class StringValue : public Value {
-std::string value;
+    std::string value;
 public:
-StringValue(std::string value) : Value(ValueType::String), value(std::move(value)) {
-}
+    explicit StringValue(std::string value) : Value(ValueType::String), value(std::move(value)) {
+    }
 
-std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
 };
 
 
 class BoolValue : public Value {
-bool value;
+    bool value;
 public:
-explicit BoolValue(bool value) : Value(ValueType::Bool), value(value) {
-}
+    explicit BoolValue(bool value) : Value(ValueType::Bool), value(value) {
+    }
 
-std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
 
-bool is_true() const override {
-  return value;
-}
+    [[nodiscard]] bool is_true() const override {
+        return value;
+    }
 };
 
 
 class NilValue : public Value {
 public:
-NilValue() : Value(ValueType::Nil) {
-}
+    NilValue() : Value(ValueType::Nil) {
+    }
 
-std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
 };
 
 

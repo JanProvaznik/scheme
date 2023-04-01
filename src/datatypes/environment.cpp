@@ -127,7 +127,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("<=", std::make_shared<FunctionValue>(make_comparison_function(std::less_equal<double>())));
 
 // abs
-   auto abs_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+    auto abs_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         auto n = argv[0]->to_double();
         return std::static_pointer_cast<Value>(std::make_shared<FloatValue>(std::abs(n)));
     };
@@ -178,21 +178,23 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 // number?
 
     auto number_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Integer || argv[0]->get_type() == ValueType::Float));
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                argv[0]->get_type() == ValueType::Integer || argv[0]->get_type() == ValueType::Float));
     };
     set("number?", std::make_shared<FunctionValue>(number_question_function_pointer));
 // real?
 
     auto real_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Integer || argv[0]->get_type() == ValueType::Float));
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                argv[0]->get_type() == ValueType::Integer || argv[0]->get_type() == ValueType::Float));
     };
     set("real?", std::make_shared<FunctionValue>(real_question_function_pointer));
 // integer?
-        auto integer_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Integer));
-        };
-        set("integer?", std::make_shared<FunctionValue>(integer_question_function_pointer));
-        set("rational?", std::make_shared<FunctionValue>(integer_question_function_pointer));
+    auto integer_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Integer));
+    };
+    set("integer?", std::make_shared<FunctionValue>(integer_question_function_pointer));
+    set("rational?", std::make_shared<FunctionValue>(integer_question_function_pointer));
 
 
 // boolean?
@@ -242,49 +244,67 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("concat", std::make_shared<FunctionValue>(concat_function_pointer));
 
 
-auto number_comparison_function = [](auto &comparison, size_t argc, std::vector<ValuePtr> &argv) {
+    auto number_comparison_function = [](auto &comparison, size_t argc, std::vector<ValuePtr> &argv) {
         auto n = argv[0]->to_double();
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(comparison(n)));
     };
 
-    auto zero_comparison = [](double n) { return n == 0; };
-    set("zero?", std::make_shared<FunctionValue>([number_comparison_function, zero_comparison](auto && PH1, auto && PH2) { return number_comparison_function(zero_comparison, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    auto zero_comparison = [](double n) {
+        return n == 0;
+    };
+    set("zero?", std::make_shared<FunctionValue>([number_comparison_function, zero_comparison](auto &&PH1, auto &&PH2) {
+        return number_comparison_function(zero_comparison, std::forward<decltype(PH1)>(PH1),
+                                          std::forward<decltype(PH2)>(PH2));
+    }));
 
-    auto positive_comparison = [](double n) { return n > 0; };
-    set("positive?", std::make_shared<FunctionValue>([number_comparison_function, positive_comparison](auto && PH1, auto && PH2) { return number_comparison_function(positive_comparison, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    auto positive_comparison = [](double n) {
+        return n > 0;
+    };
+    set("positive?",
+        std::make_shared<FunctionValue>([number_comparison_function, positive_comparison](auto &&PH1, auto &&PH2) {
+            return number_comparison_function(positive_comparison, std::forward<decltype(PH1)>(PH1),
+                                              std::forward<decltype(PH2)>(PH2));
+        }));
 
-    auto negative_comparison = [](double n) { return n < 0; };
-    set("negative?", std::make_shared<FunctionValue>([number_comparison_function, negative_comparison](auto && PH1, auto && PH2) { return number_comparison_function(negative_comparison, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    auto negative_comparison = [](double n) {
+        return n < 0;
+    };
+    set("negative?",
+        std::make_shared<FunctionValue>([number_comparison_function, negative_comparison](auto &&PH1, auto &&PH2) {
+            return number_comparison_function(negative_comparison, std::forward<decltype(PH1)>(PH1),
+                                              std::forward<decltype(PH2)>(PH2));
+        }));
 
-auto odd_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    if (argv[0]->get_type() != ValueType::Integer) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
-    }
-    auto n = std::static_pointer_cast<IntegerValue>(argv[0])->get_value();
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(n % 2 == 1));
-};
+    auto odd_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        if (argv[0]->get_type() != ValueType::Integer) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+        }
+        auto n = std::static_pointer_cast<IntegerValue>(argv[0])->get_value();
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(n % 2 == 1));
+    };
     set("odd?", std::make_shared<FunctionValue>(odd_question_function_pointer));
 // even
-auto even_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    if (argv[0]->get_type() != ValueType::Integer) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
-    }
-    auto n = std::static_pointer_cast<IntegerValue>(argv[0])->get_value();
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(n % 2 == 0));
-};
+    auto even_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        if (argv[0]->get_type() != ValueType::Integer) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+        }
+        auto n = std::static_pointer_cast<IntegerValue>(argv[0])->get_value();
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(n % 2 == 0));
+    };
     set("even?", std::make_shared<FunctionValue>(even_question_function_pointer));
 
 // exact
-auto exact_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Integer));
-};
+    auto exact_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Integer));
+    };
     set("exact?", std::make_shared<FunctionValue>(exact_question_function_pointer));
 
 // inexact
-auto inexact_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Float));
-};
-    set("inexact?", std::static_pointer_cast<Value>(std::make_shared<FunctionValue>(inexact_question_function_pointer)));
+    auto inexact_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Float));
+    };
+    set("inexact?",
+        std::static_pointer_cast<Value>(std::make_shared<FunctionValue>(inexact_question_function_pointer)));
 
 
 
@@ -361,90 +381,96 @@ auto inexact_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &
 
 
 //string->symbol
-auto string_to_symbol_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string = std::static_pointer_cast<StringValue>(argv[0]);
-    return std::static_pointer_cast<Value>(std::make_shared<SymbolValue>(string->to_string()));
-};
+    auto string_to_symbol_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string = std::static_pointer_cast<StringValue>(argv[0]);
+        return std::static_pointer_cast<Value>(std::make_shared<SymbolValue>(string->to_string()));
+    };
     set("string->symbol", std::make_shared<FunctionValue>(string_to_symbol_function_pointer));
 
 
 //symbol?
-auto symbol_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Symbol));
-};
+    auto symbol_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::Symbol));
+    };
     set("symbol?", std::make_shared<FunctionValue>(symbol_question_function_pointer));
 
 //symbol->string
 
-auto symbol_to_string_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto symbol = std::static_pointer_cast<SymbolValue>(argv[0]);
-    return std::static_pointer_cast<Value>(std::make_shared<StringValue>(symbol->to_string()));
-};
+    auto symbol_to_string_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto symbol = std::static_pointer_cast<SymbolValue>(argv[0]);
+        return std::static_pointer_cast<Value>(std::make_shared<StringValue>(symbol->to_string()));
+    };
     set("symbol->string", std::make_shared<FunctionValue>(symbol_to_string_function_pointer));
 
 //string?
-auto string_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::String));
-};
+    auto string_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->get_type() == ValueType::String));
+    };
     set("string?", std::make_shared<FunctionValue>(string_question_function_pointer));
 
 
 
 //string-length
 
-auto string_length_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string = std::static_pointer_cast<StringValue>(argv[0]);
-    return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(string->to_string().length()));
-};
+    auto string_length_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string = std::static_pointer_cast<StringValue>(argv[0]);
+        return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(string->to_string().length()));
+    };
     set("string-length", std::make_shared<FunctionValue>(string_length_function_pointer));
 
 //string-ref
 
-auto string_ref_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string = std::static_pointer_cast<StringValue>(argv[0]);
-    auto index = std::static_pointer_cast<IntegerValue>(argv[1]);
-    return std::static_pointer_cast<Value>(std::make_shared<StringValue>(string->to_string().substr(index->get_value(), 1)));
-};
+    auto string_ref_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string = std::static_pointer_cast<StringValue>(argv[0]);
+        auto index = std::static_pointer_cast<IntegerValue>(argv[1]);
+        return std::static_pointer_cast<Value>(
+                std::make_shared<StringValue>(string->to_string().substr(index->get_value(), 1)));
+    };
     set("string-ref", std::make_shared<FunctionValue>(string_ref_function_pointer));
 
-auto string_equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
-    auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(string1->to_string() == string2->to_string()));
-};
-set("string=?", std::make_shared<FunctionValue>(string_equal_question_function_pointer));
+    auto string_equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
+        auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
+        return std::static_pointer_cast<Value>(
+                std::make_shared<BoolValue>(string1->to_string() == string2->to_string()));
+    };
+    set("string=?", std::make_shared<FunctionValue>(string_equal_question_function_pointer));
 
-auto string_less_than_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
-    auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(string1->to_string() < string2->to_string()));
-};
-set("string<?", std::make_shared<FunctionValue>(string_less_than_question_function_pointer));
+    auto string_less_than_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
+        auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
+        return std::static_pointer_cast<Value>(
+                std::make_shared<BoolValue>(string1->to_string() < string2->to_string()));
+    };
+    set("string<?", std::make_shared<FunctionValue>(string_less_than_question_function_pointer));
 
 // string>?
-auto string_greater_than_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
-    auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(string1->to_string() > string2->to_string()));
-};
-set("string>?", std::make_shared<FunctionValue>(string_greater_than_question_function_pointer));
+    auto string_greater_than_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
+        auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
+        return std::static_pointer_cast<Value>(
+                std::make_shared<BoolValue>(string1->to_string() > string2->to_string()));
+    };
+    set("string>?", std::make_shared<FunctionValue>(string_greater_than_question_function_pointer));
 
 // string<=?
-auto string_less_than_or_equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
-    auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(string1->to_string() <= string2->to_string()));
-};
+    auto string_less_than_or_equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
+        auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
+        return std::static_pointer_cast<Value>(
+                std::make_shared<BoolValue>(string1->to_string() <= string2->to_string()));
+    };
 
-set("string<=?", std::make_shared<FunctionValue>(string_less_than_or_equal_question_function_pointer));
+    set("string<=?", std::make_shared<FunctionValue>(string_less_than_or_equal_question_function_pointer));
 
 // string>=?
-auto string_greater_than_or_equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
-    auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(string1->to_string() >= string2->to_string()));
-};
-set("string>=?", std::make_shared<FunctionValue>(string_greater_than_or_equal_question_function_pointer));
+    auto string_greater_than_or_equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        auto string1 = std::static_pointer_cast<StringValue>(argv[0]);
+        auto string2 = std::static_pointer_cast<StringValue>(argv[1]);
+        return std::static_pointer_cast<Value>(
+                std::make_shared<BoolValue>(string1->to_string() >= string2->to_string()));
+    };
+    set("string>=?", std::make_shared<FunctionValue>(string_greater_than_or_equal_question_function_pointer));
 
 // vectors are lists, easy
     set("vector?", std::make_shared<FunctionValue>(list_queston_function_pointer));
@@ -545,56 +571,57 @@ set("string>=?", std::make_shared<FunctionValue>(string_greater_than_or_equal_qu
     set("for-each", std::make_shared<FunctionValue>(for_each_function_pointer));
 
 
+    auto eq_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        // just compare if the pointers point to the same thing
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
 
-auto eq_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    // just compare if the pointers point to the same thing
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
-
-};
-set("eq?", std::make_shared<FunctionValue>(eq_question_function_pointer));
+    };
+    set("eq?", std::make_shared<FunctionValue>(eq_question_function_pointer));
 
 //    Two structured mutable objects are operationally equivalent
 //    if they have operationally equivalent values in corresponding positions,
 //    and applying a mutation procedure to one causes the other to change as well.
-auto eqv_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    if (argv[0]->get_type() != argv[1]->get_type()) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
-    }
-    if (argv[0]->get_type() == ValueType::Integer) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
-                std::static_pointer_cast<IntegerValue>(argv[0])->get_value() ==
-                std::static_pointer_cast<IntegerValue>(argv[1])->get_value()));
-    }
-    if (argv[0]->get_type() == ValueType::Float) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
-                std::static_pointer_cast<FloatValue>(argv[0])->get_value() ==
-                std::static_pointer_cast<FloatValue>(argv[1])->get_value()));
-    }
-    if (argv[0]->get_type() == ValueType::Bool) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
-                std::static_pointer_cast<BoolValue>(argv[0])->is_true() == std::static_pointer_cast<BoolValue>(argv[1])->is_true()));
-    }
+    auto eqv_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        if (argv[0]->get_type() != argv[1]->get_type()) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
+        }
+        if (argv[0]->get_type() == ValueType::Integer) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                    std::static_pointer_cast<IntegerValue>(argv[0])->get_value() ==
+                    std::static_pointer_cast<IntegerValue>(argv[1])->get_value()));
+        }
+        if (argv[0]->get_type() == ValueType::Float) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                    std::static_pointer_cast<FloatValue>(argv[0])->get_value() ==
+                    std::static_pointer_cast<FloatValue>(argv[1])->get_value()));
+        }
+        if (argv[0]->get_type() == ValueType::Bool) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                    std::static_pointer_cast<BoolValue>(argv[0])->is_true() ==
+                    std::static_pointer_cast<BoolValue>(argv[1])->is_true()));
+        }
 
-    if (argv[0]->get_type() == ValueType::Symbol) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
-                std::static_pointer_cast<SymbolValue>(argv[0])->to_string() ==
-                std::static_pointer_cast<SymbolValue>(argv[1])->to_string()));
-    }
-    // nil
-    if (argv[0]->get_type() == ValueType::Nil) {
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
-    }
-    // otherwise it has to point to the same thing
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
+        if (argv[0]->get_type() == ValueType::Symbol) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                    std::static_pointer_cast<SymbolValue>(argv[0])->to_string() ==
+                    std::static_pointer_cast<SymbolValue>(argv[1])->to_string()));
+        }
+        // nil
+        if (argv[0]->get_type() == ValueType::Nil) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
+        }
+        // otherwise it has to point to the same thing
+        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
 
 
-};
-set("eqv?", std::make_shared<FunctionValue>(eqv_question_function_pointer));
+    };
+    set("eqv?", std::make_shared<FunctionValue>(eqv_question_function_pointer));
 
 //A rule of thumb is that objects are generally equal? when they print the same.
-auto equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
-    return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0]->to_string() == argv[1]->to_string()));
-};
+    auto equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+        return std::static_pointer_cast<Value>(
+                std::make_shared<BoolValue>(argv[0]->to_string() == argv[1]->to_string()));
+    };
     set("equal?", std::make_shared<FunctionValue>(equal_question_function_pointer));
 
 // TODO (memq obj list)
@@ -617,11 +644,23 @@ auto equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &ar
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
     };
 
-    set("memq", std::make_shared<FunctionValue>([generic_member_function, &eq_question_function_pointer](auto && PH1, auto && PH2) { return generic_member_function(eq_question_function_pointer, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    set("memq", std::make_shared<FunctionValue>(
+            [generic_member_function, &eq_question_function_pointer](auto &&PH1, auto &&PH2) {
+                return generic_member_function(eq_question_function_pointer, std::forward<decltype(PH1)>(PH1),
+                                               std::forward<decltype(PH2)>(PH2));
+            }));
 
-    set("memv", std::make_shared<FunctionValue>([generic_member_function, &eqv_question_function_pointer](auto && PH1, auto && PH2) { return generic_member_function(eqv_question_function_pointer, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    set("memv", std::make_shared<FunctionValue>(
+            [generic_member_function, &eqv_question_function_pointer](auto &&PH1, auto &&PH2) {
+                return generic_member_function(eqv_question_function_pointer, std::forward<decltype(PH1)>(PH1),
+                                               std::forward<decltype(PH2)>(PH2));
+            }));
 
-    set("member", std::make_shared<FunctionValue>([generic_member_function, &equal_question_function_pointer](auto && PH1, auto && PH2) { return generic_member_function(equal_question_function_pointer, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    set("member", std::make_shared<FunctionValue>(
+            [generic_member_function, &equal_question_function_pointer](auto &&PH1, auto &&PH2) {
+                return generic_member_function(equal_question_function_pointer, std::forward<decltype(PH1)>(PH1),
+                                               std::forward<decltype(PH2)>(PH2));
+            }));
 
 //    Alist (for “association list”) must be a list of pairs. These
 //    procedures find the first pair in alist whose car field is obj ,
@@ -641,9 +680,21 @@ auto equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &ar
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
     };
 
-    set ("assq", std::make_shared<FunctionValue>([generic_assoc_function, &eq_question_function_pointer](auto && PH1, auto && PH2) { return generic_assoc_function(eq_question_function_pointer, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
-    set( "assv", std::make_shared<FunctionValue>([generic_assoc_function, &eqv_question_function_pointer](auto && PH1, auto && PH2) { return generic_assoc_function(eqv_question_function_pointer, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
-    set( "assoc", std::make_shared<FunctionValue>([generic_assoc_function, &equal_question_function_pointer](auto && PH1, auto && PH2) { return generic_assoc_function(equal_question_function_pointer, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); }));
+    set("assq", std::make_shared<FunctionValue>(
+            [generic_assoc_function, &eq_question_function_pointer](auto &&PH1, auto &&PH2) {
+                return generic_assoc_function(eq_question_function_pointer, std::forward<decltype(PH1)>(PH1),
+                                              std::forward<decltype(PH2)>(PH2));
+            }));
+    set("assv", std::make_shared<FunctionValue>(
+            [generic_assoc_function, &eqv_question_function_pointer](auto &&PH1, auto &&PH2) {
+                return generic_assoc_function(eqv_question_function_pointer, std::forward<decltype(PH1)>(PH1),
+                                              std::forward<decltype(PH2)>(PH2));
+            }));
+    set("assoc", std::make_shared<FunctionValue>(
+            [generic_assoc_function, &equal_question_function_pointer](auto &&PH1, auto &&PH2) {
+                return generic_assoc_function(equal_question_function_pointer, std::forward<decltype(PH1)>(PH1),
+                                              std::forward<decltype(PH2)>(PH2));
+            }));
 
 
 }

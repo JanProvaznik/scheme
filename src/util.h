@@ -12,10 +12,10 @@ using ListPtr = std::shared_ptr<ListValue>;
 
 template<typename T>
 std::shared_ptr<T> car(const ValuePtr &list) {
-  // cast to list
-  auto list_value = std::static_pointer_cast<ListValue>(list);
-  // return casted value
-  return std::static_pointer_cast<T>(list_value->get_value(0));
+    // cast to list
+    auto list_value = std::static_pointer_cast<ListValue>(list);
+    // return casted value
+    return std::static_pointer_cast<T>(list_value->get_value(0));
 }
 
 ListPtr cdr(const ValuePtr &list);
