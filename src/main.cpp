@@ -13,8 +13,6 @@ void rep(const EnvironmentPtr &env) {
     } catch (std::exception &e) {
         std::cout << e.what() << std::endl;
     }
-
-
 }
 
 void execute_file(const std::string &path) {
