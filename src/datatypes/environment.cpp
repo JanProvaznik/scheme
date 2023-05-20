@@ -532,7 +532,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     auto map_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         auto list = std::static_pointer_cast<ListValue>(argv[1]);
         // it's a function or a Closure
-        if (argv[1]->get_type() == ValueType::Function) {
+        if (argv[0]->get_type() == ValueType::Function) {
             auto func = std::static_pointer_cast<FunctionValue>(argv[0]);
             auto newlist = std::make_shared<ListValue>();
             for (int i = 0; i < list->size(); i++) {
@@ -558,7 +558,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     auto for_each_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         auto list = std::static_pointer_cast<ListValue>(argv[1]);
         // it's a function or a Closure
-        if (argv[1]->get_type() == ValueType::Function) {
+        if (argv[0]->get_type() == ValueType::Function) {
             auto func = std::static_pointer_cast<FunctionValue>(argv[0]);
             for (int i = 0; i < list->size(); i++) {
                 std::vector<ValuePtr> args;
