@@ -414,6 +414,60 @@ void test_map() {
     }
 }
 
+void test_eq(){
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+    auto input_output_pairs = {
+            std::make_pair("(eq? 'a 'a)", "#t"),
+            std::make_pair("(eq? (list 'a) (list 'a))", "#f"),
+            std::make_pair("(eq? '() '())", "#t"),
+            std::make_pair("(eq? car car)", "#t"),
+            std::make_pair("(let ((x '(a))) (eq? x x))", "#t"),
+            std::make_pair("(let ((p (lambda (x) x))) (eq? p p))", "#t"),
+    };
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+}
+void test_eqv(){
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+    auto input_output_pairs = {
+            std::make_pair("(eqv? 'a 'a)", "#t"),
+            std::make_pair("(eqv? 'a 'b)", "#f"),
+            std::make_pair("(eqv? 2 2)", "#t"),
+            std::make_pair("(eqv? (list 'a) (list 'a))", "#f"),
+            std::make_pair("(eqv? '() '())", "#t"),
+            std::make_pair("(eqv? car car)", "#t"),
+            std::make_pair("(let ((x '(a))) (eqv? x x))", "#t"),
+            std::make_pair("(let ((p (lambda (x) x))) (eqv? p p))", "#t"),
+            std::make_pair("(eqv? \"\" \"\")", "#t"),
+            std::make_pair("(eqv? 100000000 100000000)", "#t"),
+            std::make_pair("(eqv? (lambda () 1) (lambda () 2))", "#f"),
+            std::make_pair("(eqv? #f 'nil)", "#f"),
+
+    };
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+}
+
+void test_equal(){
+
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+    auto input_output_pairs = {
+            std::make_pair("(equal? 'a 'a)", "#t"),
+            std::make_pair("(equal? '(a) '(a))", "#t"),
+            std::make_pair("(equal? '(a (b) c) '(a (b) c))", "#t"),
+            std::make_pair("(equal? \"abc\" \"abc\")", "#t"),
+            std::make_pair("(equal? 2 2)", "#t"),
+            std::make_pair("(equal? (make-vector 5 'a) (make-vector 5 'a))", "#t"),
+    };
+
+
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+}
+
 
 void run_tests() {
     test_tokenizer();
@@ -433,6 +487,9 @@ void run_tests() {
     test_cons_concat();
     test_quote();
     test_map();
+    test_eq();
+    test_eqv();
+    test_equal();
 }
 
 int main(int argc, char **argv) {

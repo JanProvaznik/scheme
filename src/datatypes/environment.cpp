@@ -578,13 +578,6 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
     set("for-each", std::make_shared<FunctionValue>(for_each_function_pointer));
 
 
-    auto eq_question_function_pointer = [](size_t argc, const std::vector<ValuePtr> &argv) {
-        // just compare if the pointers point to the same thing
-        return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
-
-    };
-    set("eq?", std::make_shared<FunctionValue>(eq_question_function_pointer));
-
 //    Two structured mutable objects are operationally equivalent
 //    if they have operationally equivalent values in corresponding positions,
 //    and applying a mutation procedure to one causes the other to change as well.
@@ -613,16 +606,36 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
                     std::static_pointer_cast<SymbolValue>(argv[0])->to_string() ==
                     std::static_pointer_cast<SymbolValue>(argv[1])->to_string()));
         }
-        // nil
         if (argv[0]->get_type() == ValueType::Nil) {
             return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
         }
+        // strings (implementation defined)
+        if (argv[0]->get_type() == ValueType::String) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                    std::static_pointer_cast<StringValue>(argv[0])->to_string() ==
+                    std::static_pointer_cast<StringValue>(argv[1])->to_string()));
+        }
+        // empty lists
+        if (argv[0]->get_type() == ValueType::List) {
+            if (std::static_pointer_cast<ListValue>(argv[0])->size() == 0 &&
+                std::static_pointer_cast<ListValue>(argv[1])->size() == 0) {
+                return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
+            }
+        }
+
         // otherwise it has to point to the same thing
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
 
 
     };
     set("eqv?", std::make_shared<FunctionValue>(eqv_question_function_pointer));
+
+// Eq?’s behavior on numbers and characters is implementation-dependent, but it will always return either true or false,
+// and will return true only when eqv? would also return true. Eq? may also behave differently from eqv? on empty vectors and empty strings.
+//    => simplify so they do the same thing
+    auto eq_question_function_pointer = eqv_question_function_pointer;
+    set("eq?", std::make_shared<FunctionValue>(eq_question_function_pointer));
+
 
 //A rule of thumb is that objects are generally equal? when they print the same.
     auto equal_question_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
