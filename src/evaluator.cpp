@@ -215,7 +215,7 @@ ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
                 }
                 // last expression in body
                 ast = body_list->get_value(body_list->size() - 1);
-                goto tco;
+                continue;
 
             } else {
                 throw std::runtime_error(
