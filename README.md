@@ -24,8 +24,13 @@ Some of the library functions are possible to implement in Scheme itself, but he
 
 # How to use
 CMake is used to build the project. When the executable is built 
-simply use `./scheme` to run the repl, or `./scheme <file>` to interpret a .scm file.
+simply use `./Scheme` to run the repl, or `./Scheme <file>` to interpret a .scm file.
 
+There is a `Dockerfile` that can be used to build a docker image with the interpreter.
+```bash
+sudo docker build -t schemecpp .
+sudo docker run -it schemecpp
+```
 
 # Developer notes
 
