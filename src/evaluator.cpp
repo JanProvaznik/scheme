@@ -49,7 +49,6 @@ std::shared_ptr<Value> eval_ast(const ValuePtr &value, const EnvironmentPtr& env
 ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
     auto ast = ast_in;
     auto env = env_in;
-    tco: // tail call optimization
     while (true) {
         if (ast->get_type() != ValueType::List)
             return eval_ast(ast, env);
@@ -90,7 +89,7 @@ ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
                     }
                     ast = body->get_value(body->size() - 1);
                     env = new_env;
-                    goto tco;
+                    continue;
 
                 } else if (symbol_name == "quote") {
                     return list_ast->get_value(1);
@@ -116,7 +115,7 @@ ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
 
                     }
                     ast = exprs->get_value(exprs->size() - 1);
-                    goto tco;
+                    continue;
 
 
                 } else if (symbol_name == "set!") {
@@ -138,10 +137,10 @@ ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
                     auto test = eval(car<Value>(cdr(list_ast)), env);
                     if (test->is_true()) {
                         ast = car<Value>(cdr(cdr(list_ast)));
-                        goto tco;
+                        continue;
                     } else {
                         ast = car<Value>(cdr(cdr(cdr(list_ast))));
-                        goto tco;
+                        continue;
                     }
                 } else if (symbol_name == "cond") {
 //                    Each 〈clause〉 should be of the form
@@ -157,6 +156,7 @@ ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
 //                    result of the last 〈expression〉 in the 〈clause〉 is returned
 //                    as the result of the entire cond expression. If the selected
                     auto clauses = cdr(list_ast);
+                    bool tco = false;
                     for (int i = 0; i < clauses->size(); ++i) {
                         auto clause = std::static_pointer_cast<ListValue>(clauses->get_value(i));
                         auto test = car<Value>(clause);
@@ -169,11 +169,13 @@ ValuePtr eval(const ValuePtr &ast_in, const EnvironmentPtr &env_in) {
 
                             }
                             ast = exprs->get_value(exprs->size() - 1);
-                            goto tco;
+                            tco = true;
+                            break;
                         }
 
 
                     }
+                    if (tco) continue;
 
 
                 }
