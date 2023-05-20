@@ -580,6 +580,25 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 
     auto eq_question_function_pointer = [](size_t argc, const std::vector<ValuePtr> &argv) {
         // just compare if the pointers point to the same thing
+        // edge case for symbols, they might not point to anything meaningful so we just compare the strings:
+        if (argv[0]->get_type() == ValueType::Symbol && argv[1]->get_type() == ValueType::Symbol) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(
+                    argv[0]->to_string() == argv[1]->to_string()));
+        }
+        // nil is equal to itself
+        if (argv[0]->get_type() == ValueType::Nil && argv[1]->get_type() == ValueType::Nil) {
+            return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
+        }
+        // empty list is equal to itself
+        if (argv[0]->get_type() == ValueType::List && argv[1]->get_type() == ValueType::List) {
+            auto list1 = std::static_pointer_cast<ListValue>(argv[0]);
+            auto list2 = std::static_pointer_cast<ListValue>(argv[1]);
+            if (list1->size() == 0 && list2->size() == 0) {
+                return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(true));
+            }
+        }
+
+        // otherwise just compare pointers
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(argv[0] == argv[1]));
 
     };

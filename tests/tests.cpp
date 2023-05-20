@@ -414,6 +414,21 @@ void test_map() {
     }
 }
 
+void test_eq(){
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+    auto input_output_pairs = {
+            std::make_pair("(eq? 'a 'a)", "#t"),
+            std::make_pair("(eq? (list 'a) (list 'a))", "#f"),
+            std::make_pair("(eq? '() '())", "#t"),
+            std::make_pair("(eq? car car)", "#t"),
+            std::make_pair("(let ((x '(a))) (eq? x x))", "#t"),
+            std::make_pair("(let ((p (lambda (x) x))) (eq? p p))", "#t"),
+    };
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+}
+
 
 void run_tests() {
     test_tokenizer();
@@ -433,6 +448,7 @@ void run_tests() {
     test_cons_concat();
     test_quote();
     test_map();
+    test_eq();
 }
 
 int main(int argc, char **argv) {
