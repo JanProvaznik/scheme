@@ -22,6 +22,7 @@ ListPtr cdr(const ValuePtr &list);
 
 
 bool check_signature(const std::vector<ValuePtr> &argv, const std::vector<ValueType> &types);
+void check_arity(std::string &name, size_t expected, size_t actual);
 
 
 #endif //SCHEME_UTIL_H
