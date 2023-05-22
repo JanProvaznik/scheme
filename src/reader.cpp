@@ -58,7 +58,6 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
         }
         throw std::runtime_error("invalid boolean literal");
     }
-    // FIXME: isn't hash also used for vectors??
     // comment
     if (source[pos] == ';') {
         // find the end of the comment
@@ -80,8 +79,7 @@ std::pair<TOKEN_TYPE, std::string> Tokenizer::next_token() {
         if (end == std::string::npos) {
             throw std::runtime_error("unterminated string");
         }
-        // FIXME: escape sequences
-        std::string token = source.substr(pos, end - pos + 1);
+        std::string token = source.substr(pos+1, end - pos + 1 - 2);
         pos = end + 1;
         auto pair = std::make_pair(TOKEN_TYPE::STRING, token);
         this->current_token = pair;

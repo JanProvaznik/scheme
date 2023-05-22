@@ -15,6 +15,7 @@
 (newline)
 (define inc5 (lambda (a)  ;; a comment after code
   (+ 5 a)))
-   ""
+(define l (list 1 2 3))
+(for-each (lambda (x) (write x)) l)
 
     )

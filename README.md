@@ -74,7 +74,11 @@ Additional data types can be added by extending `Value` class from `src/datatype
 
 ## Testing
 The `tests` target in CMake builds and runs a test executable from `tests/test.cpp`.
-There is also an example .scm file in `tests/` directory, which can be used to test support for running a file.
+The `run_tests` function documents what tests are run. Most of them target the evaluation of specific expressions.
+There is also an example `executable_file.scm` in `tests/` directory, which can be used to test support for running a file and printing.
+```shell
+./Scheme tests/executable_file.scm
+```
 
 # Resources used:
 - [mal - Make a Lisp](https://github.com/kanaka/mal)

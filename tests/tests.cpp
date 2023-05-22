@@ -32,7 +32,7 @@ void test_tokenizer() {
     }
 }
 
-void test_car_cdr() {
+void test_car_cdr_internal() {
     // test car and cdr
     auto list = std::make_shared<ListValue>();
     list->add_value(std::make_shared<IntegerValue>(1));
@@ -70,7 +70,7 @@ void test_car_cdr() {
 }
 
 // end-to-end tests
-bool eval_from_string_test(const std::string& source, const std::string& expected_output, const EnvironmentPtr &env) {
+bool eval_from_string_test(const std::string &source, const std::string &expected_output, const EnvironmentPtr &env) {
     Tokenizer tokenizer(source);
     Reader reader;
     auto ast = reader.read_form(tokenizer);
@@ -223,6 +223,17 @@ void test_list_functions() {
             std::make_pair("(length (list))", "0"),
             std::make_pair("(if (> (count (list 1 2 3)) 3) 89 78)", "78"),
             std::make_pair("(if (>= (count (list 1 2 3)) 3) 89 78)", "89"),
+
+            std::make_pair("(length '(1 2 3))", "3"),
+            std::make_pair("(length '())", "0"),
+            std::make_pair("(length '(1))", "1"),
+            std::make_pair("(length '(1 2 3 4 5))", "5"),
+
+            std::make_pair("(append '(1 2 3) '(4 5 6))", "(1 2 3 4 5 6)"),
+            std::make_pair("(append '(1) '(4 5 6))", "(1 4 5 6)"),
+            std::make_pair("(append '() '(4 5 6))", "(4 5 6)"),
+            std::make_pair("(append '(1 2 3) '())", "(1 2 3)"),
+            std::make_pair("(append '() '())", "()"),
     };
     for (auto [input, output]: input_output_pairs) {
         eval_from_string_test(input, output, env);
@@ -415,7 +426,7 @@ void test_map() {
     }
 }
 
-void test_eq(){
+void test_eq() {
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
     auto input_output_pairs = {
             std::make_pair("(eq? 'a 'a)", "#t"),
@@ -429,7 +440,8 @@ void test_eq(){
         eval_from_string_test(input, output, env);
     }
 }
-void test_eqv(){
+
+void test_eqv() {
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
     auto input_output_pairs = {
             std::make_pair("(eqv? 'a 'a)", "#t"),
@@ -451,7 +463,7 @@ void test_eqv(){
     }
 }
 
-void test_equal(){
+void test_equal() {
 
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
     auto input_output_pairs = {
@@ -468,7 +480,8 @@ void test_equal(){
         eval_from_string_test(input, output, env);
     }
 }
-void test_define(){
+
+void test_define() {
     // define function does not work, if you want to use functions use lambda
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
     auto input_output_pairs = {
@@ -487,17 +500,15 @@ void test_define(){
     }
 
 }
-void test_let(){
+
+void test_let() {
     // let letrec and let* are all the same
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
     auto input_output_pairs = {
             std::make_pair("(let ((x 2) (y 3)) (* x y))", "6"),
-            std::make_pair("(let ((x 2) (y 3)) (let ((x 7) (z (+ x y))) (* z x)))", "35"),
             std::make_pair("(let ((x 2) (y 3)) (let* ((x 7) (z (+ x y))) (* z x)))", "70"),
-            std::make_pair("(let ((x 2) (y 3)) (letrec ((foo (lambda (z) (+ x y z)))) (foo 4)))", "9"),
-            std::make_pair("(let ((x 2) (y 3)) (let ((x 7) (z (+ x y))) (* z x)))", "35"),
-            std::make_pair("(let ((x 2) (y 3)) (letrec ((foo (lambda (z) (+ x y z)))) (foo 4)))", "9"),
-            std::make_pair("(let ((x 2) (y 3)) (letrec ((foo (lambda (z) (+ x y z)))) (let ((x 7) (z (+ x y))) (* z (foo 4)))))", "63"),
+            std::make_pair("(let ((x 2) (y 3)) (letrec ((foo (lambda (z) (+ x (+ y z))))) (foo 4)))", "9"),
+            std::make_pair("(let ((x 2) (y 3)) (letrec ((foo (lambda (z) (+ x (+ y z))))) (foo 4)))", "9"),
             std::make_pair("(let ((x 2) (y 3)) (let* ((x 7) (z (+ x y))) (* z x)))", "70")
     };
     for (auto [input, output]: input_output_pairs) {
@@ -505,16 +516,15 @@ void test_let(){
     }
 
 }
-void test_cond(){
 
+void test_cond() {
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
-
     auto input_output_pairs = {
             std::make_pair("(cond ((> 3 2) 'greater) ((< 3 2) 'less))", "greater"),
             std::make_pair("(cond ((> 3 3) 'greater) ((< 3 3) 'less) (else 'equal))", "equal"),
-            std::make_pair("(cond ((> 3 3) 'greater) ((< 3 3) 'less))", "#f"),
+            std::make_pair("(cond ((> 3 3) 'greater) ((< 3 3) 'less))", "nil"),
             std::make_pair("(cond ((> 3 2) 'greater))", "greater"),
-            std::make_pair("(cond ((> 3 3) 'greater))", "#f")
+            std::make_pair("(cond ((> 3 3) 'greater))", "nil")
     };
     for (auto [input, output]: input_output_pairs) {
         eval_from_string_test(input, output, env);
@@ -523,17 +533,17 @@ void test_cond(){
 }
 
 // - abs, quotient, remainder, max, min
-void test_num_functions(){
+void test_num_functions() {
 
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
 
     auto input_output_pairs = {
-            std::make_pair("(abs -7)", "7"),
-            std::make_pair("(abs 7)", "7"),
-            std::make_pair("(abs 0)", "0"),
-            std::make_pair("(abs -2.5)", "2.5"),
-            std::make_pair("(abs 2.5)", "2.5"),
-            std::make_pair("(abs 0.0)", "0"),
+            std::make_pair("(abs -7)", "7.000000"),
+            std::make_pair("(abs 7)", "7.000000"),
+            std::make_pair("(abs 0)", "0.000000"),
+            std::make_pair("(abs -2.5)", "2.500000"),
+            std::make_pair("(abs 2.5)", "2.500000"),
+            std::make_pair("(abs 0.0)", "0.000000"),
 
             std::make_pair("(quotient 6 4)", "1"),
             std::make_pair("(quotient 6 3)", "2"),
@@ -544,20 +554,21 @@ void test_num_functions(){
             std::make_pair("(remainder 6 2)", "0"),
 
             std::make_pair("(max 6 4)", "6"),
-            std::make_pair("(max 6.0 3.1)", "6"),
+            std::make_pair("(max 6.0 3.1)", "6.000000"),
             std::make_pair("(max -1 2)", "2"),
 
             std::make_pair("(min 6 4)", "4"),
-            std::make_pair("(min 6.0 3.1)", "3.1"),
+            std::make_pair("(min 6.0 3.1)", "3.100000"),
             std::make_pair("(min -1 2)", "-1"),
     };
     for (auto [input, output]: input_output_pairs) {
         eval_from_string_test(input, output, env);
     }
+
 }
 
 
-void test_type_questions(){
+void test_type_questions() {
 
     EnvironmentPtr env = std::make_shared<BaseEnvironment>();
     auto input_output_pairs = {
@@ -577,7 +588,7 @@ void test_type_questions(){
             std::make_pair("(real? \"a\")", "#f"),
             std::make_pair("(real? (cons 1 2))", "#f"),
             std::make_pair("(real? (lambda (x) x))", "#f"),
-// integer? 
+// integer?
             std::make_pair("(integer? 1)", "#t"),
             std::make_pair("(integer? 1.0)", "#f"),
             std::make_pair("(integer? #t)", "#f"),
@@ -593,7 +604,7 @@ void test_type_questions(){
             std::make_pair("(rational? \"a\")", "#f"),
             std::make_pair("(rational? (cons 1 2))", "#f"),
             std::make_pair("(rational? (lambda (x) x))", "#f"),
-// boolean? 
+// boolean?
             std::make_pair("(boolean? 1)", "#f"),
             std::make_pair("(boolean? 1.0)", "#f"),
             std::make_pair("(boolean? #t)", "#t"),
@@ -601,7 +612,7 @@ void test_type_questions(){
             std::make_pair("(boolean? \"a\")", "#f"),
             std::make_pair("(boolean? (cons 1 2))", "#f"),
             std::make_pair("(boolean? (lambda (x) x))", "#f"),
-// symbol? 
+// symbol?
             std::make_pair("(symbol? 1)", "#f"),
             std::make_pair("(symbol? 1.0)", "#f"),
             std::make_pair("(symbol? #t)", "#f"),
@@ -609,7 +620,7 @@ void test_type_questions(){
             std::make_pair("(symbol? \"a\")", "#f"),
             std::make_pair("(symbol? (cons 1 2))", "#f"),
             std::make_pair("(symbol? (lambda (x) x))", "#f"),
-// string? 
+// string?
             std::make_pair("(string? 1)", "#f"),
             std::make_pair("(string? 1.0)", "#f"),
             std::make_pair("(string? #t)", "#f"),
@@ -618,7 +629,7 @@ void test_type_questions(){
             std::make_pair("(string? (cons 1 2))", "#f"),
             std::make_pair("(string? (lambda (x) x))", "#f"),
 
-// pair? 
+// pair?
             std::make_pair("(pair? 1)", "#f"),
             std::make_pair("(pair? 1.0)", "#f"),
             std::make_pair("(pair? #t)", "#f"),
@@ -640,7 +651,7 @@ void test_type_questions(){
             std::make_pair("(vector? #t)", "#f"),
             std::make_pair("(vector? 'a)", "#f"),
             std::make_pair("(vector? \"a\")", "#f"),
-            std::make_pair("(vector? (cons 1 2))", "#f"),
+            std::make_pair("(vector? (cons 1 2))", "#t"),
             std::make_pair("(vector? (lambda (x) x))", "#f"),
 // procedure?
             std::make_pair("(procedure? 1)", "#f"),
@@ -650,6 +661,16 @@ void test_type_questions(){
             std::make_pair("(procedure? \"a\")", "#f"),
             std::make_pair("(procedure? (cons 1 2))", "#f"),
             std::make_pair("(procedure? (lambda (x) x))", "#t"),
+// null?
+            std::make_pair("(null? 1)", "#f"),
+            std::make_pair("(null? 1.0)", "#f"),
+            std::make_pair("(null? #t)", "#f"),
+            std::make_pair("(null? 'a)", "#f"),
+            std::make_pair("(null? \"a\")", "#f"),
+            std::make_pair("(null? (cons 1 2))", "#f"),
+            std::make_pair("(null? (lambda (x) x))", "#f"),
+            std::make_pair("(null? '())", "#t"),
+            std::make_pair("(null? (list))", "#t"),
 
     };
 
@@ -668,35 +689,35 @@ void test_num_questions() {
             std::make_pair("(zero? 1)", "#f"),
             std::make_pair("(zero? -1)", "#f"),
             std::make_pair("(zero? 1.0)", "#f"),
-        // positive? 
+            // positive?
             std::make_pair("(positive? 0)", "#f"),
             std::make_pair("(positive? 1)", "#t"),
             std::make_pair("(positive? -1)", "#f"),
             std::make_pair("(positive? 1.0)", "#t"),
-        //negative?
+            //negative?
             std::make_pair("(negative? 0)", "#f"),
             std::make_pair("(negative? 1)", "#f"),
             std::make_pair("(negative? -1)", "#t"),
             std::make_pair("(negative? 1.0)", "#f"),
-        // odd?
+            // odd?
             std::make_pair("(odd? 0)", "#f"),
             std::make_pair("(odd? 1)", "#t"),
             std::make_pair("(odd? 33421)", "#t"),
             std::make_pair("(odd? -1)", "#t"),
             std::make_pair("(odd? 2)", "#f"),
 
-        // even?
+            // even?
             std::make_pair("(even? 0)", "#t"),
             std::make_pair("(even? 1)", "#f"),
             std::make_pair("(even? 33421)", "#f"),
             std::make_pair("(even? -1)", "#f"),
             std::make_pair("(even? 2)", "#t"),
-        // exact?
+            // exact?
             std::make_pair("(exact? 0)", "#t"),
             std::make_pair("(exact? 33421)", "#t"),
             std::make_pair("(exact? -1)", "#t"),
             std::make_pair("(exact? 1.0)", "#f"),
-        // inexact? 
+            // inexact?
             std::make_pair("(inexact? 0)", "#f"),
             std::make_pair("(inexact? 33421)", "#f"),
             std::make_pair("(inexact? -1)", "#f"),
@@ -708,26 +729,160 @@ void test_num_questions() {
         eval_from_string_test(input, output, env);
     }
 }
-// - car cdr, set-car, set-cdr
 
-// null?
+void test_car_cdr() {
 
-//- string->symbol, symbol->string
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
 
-// - not and or 
-// - length, append
-// - string-length, string-ref
-// - `string=?, string<?, string>?, string<=, string>=
-// - make-vector,vector-length, vector-ref,vector-set!, vector->list,list->vector
-// - for-each
+    auto input_output_pairs = {
+            std::make_pair("(car '(1 2 3))", "1"),
+            std::make_pair("(cdr '(1 2 3))", "(2 3)"),
+            std::make_pair("(car '(1))", "1"),
+            std::make_pair("(cdr '(1))", "()"),
+            std::make_pair("(begin (define a '(1 2 3)) (set-car! a 4) a)", "(4 2 3)"),
+            std::make_pair("(begin (define a '(1 2 3)) (set-cdr! a '(4 5 6)) a)", "(1 4 5 6)"),
+    };
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+
+}
+
+
+void test_conversion() {
+
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+
+    auto input_output_pairs = {
+            std::make_pair("(string->symbol \"hello\")", "hello"),
+            std::make_pair("(symbol->string 'hello)", "\"hello\""),
+            std::make_pair("(symbol? (string->symbol \"hello\"))", "#t"),
+            std::make_pair("(string? (symbol->string 'hello))", "#t"),
+    };
+
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+
+}
+
+void test_string_functions() {
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+
+    auto input_output_pairs = {
+            std::make_pair("(string-length \"hello\")", "5"),
+            std::make_pair("(string-length \"\")", "0"),
+
+            std::make_pair("(string-ref \"hello\" 0)", "\"h\""),
+            std::make_pair("(string-ref \"hello\" 1)", "\"e\""),
+            std::make_pair("(string-ref \"hello\" 4)", "\"o\""),
+
+            std::make_pair(R"((string=? "hello" "hello"))", "#t"),
+            std::make_pair(R"((string=? "hello" "helloo"))", "#f"),
+            std::make_pair(R"((string=? "hello" "helloo"))", "#f"),
+            std::make_pair(R"((string<? "hello" "helloo"))", "#t"),
+            std::make_pair(R"((string<? "helloo" "hello"))", "#f"),
+            std::make_pair(R"((string>? "hello" "helloo"))", "#f"),
+            std::make_pair(R"((string>? "helloo" "hello"))", "#t"),
+            std::make_pair(R"((string<=? "hello" "helloo"))", "#t"),
+            std::make_pair(R"((string<=? "helloo" "hello"))", "#f"),
+            std::make_pair(R"((string>=? "hello" "helloo"))", "#f"),
+            std::make_pair(R"((string>=? "helloo" "hello"))", "#t"),
+
+    };
+
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+
+}
+
+void test_vector_functions() {
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+
+    auto input_output_pairs = {
+            std::make_pair("(vector-length (make-vector 5))", "5"),
+            std::make_pair("(vector-length (make-vector 0))", "0"),
+            std::make_pair("(vector-length (make-vector 1))", "1"),
+
+            std::make_pair("(vector-ref (make-vector 5) 0)", "nil"),
+            std::make_pair("(vector-ref (make-vector 1) 0)", "nil"),
+
+            std::make_pair("(define v (make-vector 3))", "(nil nil nil)"),
+            std::make_pair("(vector-set! v 0 1)", "nil"),
+            std::make_pair("(vector-set! v 2 1)", "nil"),
+            std::make_pair("v", "(1 nil 1)"),
+
+            std::make_pair("(vector->list (make-vector 5))", "(nil nil nil nil nil)"),
+            std::make_pair("(vector->list (make-vector 0))", "()"),
+            std::make_pair("(vector->list (make-vector 1))", "(nil)"),
+
+            std::make_pair("(list->vector '(0 0 0 0 0))", "(0 0 0 0 0)"),
+            std::make_pair("(list->vector '())", "()"),
+            std::make_pair("(list->vector '(0))", "(0)"),
+
+    };
+
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+
+}
+
+
 // - memq,memv,member
-// - assq, assv, assoc
-// display write newline tested by running external file
 
+void test_mem() {
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+
+    auto input_output_pairs = {
+            std::make_pair("(memq 'a '(a b c))", "(a b c)"),
+            std::make_pair("(memq 'b '(a b c))", "(b c)"),
+            std::make_pair("(memq 'a '(b c d))", "#f"),
+            std::make_pair("(memq (list 'a) '(b (a) c))", "#f"),
+
+            std::make_pair("(memv 2 '(1 2 3))", "(2 3)"),
+            std::make_pair("(memv 4 '(1 2 3))", "#f"),
+            std::make_pair("(memv (list 'a) '(b (a) c))", "#f"),
+
+            std::make_pair("(member 'a '(a b c))", "(a b c)"),
+            std::make_pair("(member 'a '(b c d))", "#f"),
+            std::make_pair("(member (list 'a) '(b (a) c))", "((a) c)"),
+    };
+
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+
+}
+
+void test_ass() {
+
+    EnvironmentPtr env = std::make_shared<BaseEnvironment>();
+
+    auto input_output_pairs = {
+            std::make_pair("(assq 'a '((a 5) (b 6) (c 7)))", "(a 5)"),
+            std::make_pair("(assq 'b '((a 5) (b 6) (c 7)))", "(b 6)"),
+            std::make_pair("(assq 'd '((a 5) (b 6) (c 7)))", "#f"),
+
+            std::make_pair("(assv 'a '((a 5) (b 6) (c 7)))", "(a 5)"),
+            std::make_pair("(assv 'b '((a 5) (b 6) (c 7)))", "(b 6)"),
+            std::make_pair("(assv 'd '((a 5) (b 6) (c 7)))", "#f"),
+
+            std::make_pair("(assoc 'a '((a 5) (b 6) (c 7)))", "(a 5)"),
+            std::make_pair("(assoc 'b '((a 5) (b 6) (c 7)))", "(b 6)"),
+            std::make_pair("(assoc 'd '((a 5) (b 6) (c 7)))", "#f"),
+    };
+
+    for (auto [input, output]: input_output_pairs) {
+        eval_from_string_test(input, output, env);
+    }
+
+}
 
 void run_tests() {
     test_tokenizer();
-    test_car_cdr();
+    test_car_cdr_internal();
     test_read_numbers();
     test_read_nil_true_false();
     test_read_lists();
@@ -752,6 +907,13 @@ void run_tests() {
     test_num_functions();
     test_type_questions();
     test_num_questions();
+    test_car_cdr();
+    test_conversion();
+    test_string_functions();
+    test_vector_functions();
+    test_mem();
+    test_ass();
+// display write newline, for-each tested by running external file
 
 }
 

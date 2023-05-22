@@ -160,6 +160,7 @@ class StringValue : public Value {
 public:
     explicit StringValue(std::string value) : Value(ValueType::String), value(std::move(value)) {
     }
+    [[nodiscard]] std::string get_value() const;
 
     [[nodiscard]] std::string to_string() const override;
 };
