@@ -230,6 +230,15 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 
 // cons
     auto cons_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
+
+        // if the second is not a list, just join them together
+        if (argv[1]->get_type() != ValueType::List) {
+            auto list = std::make_shared<ListValue>();
+            list->add_value(argv[0]);
+            list->add_value(argv[1]);
+            return std::static_pointer_cast<Value>(list);
+        }
+        // normal cons behavior
         auto old_list = std::static_pointer_cast<ListValue>(argv[1]);
         auto list = std::make_shared<ListValue>();
         list->add_value(argv[0]);
@@ -291,7 +300,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
         if (argv[0]->get_type() != ValueType::Integer) {
             return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
         }
-        auto n = std::static_pointer_cast<IntegerValue>(argv[0])->get_value();
+        auto n = std::abs(std::static_pointer_cast<IntegerValue>(argv[0])->get_value());
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(n % 2 == 1));
     };
     set("odd?", std::make_shared<FunctionValue>(odd_question_function_pointer));
@@ -300,7 +309,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
         if (argv[0]->get_type() != ValueType::Integer) {
             return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(false));
         }
-        auto n = std::static_pointer_cast<IntegerValue>(argv[0])->get_value();
+        auto n = std::abs(std::static_pointer_cast<IntegerValue>(argv[0])->get_value());
         return std::static_pointer_cast<Value>(std::make_shared<BoolValue>(n % 2 == 0));
     };
     set("even?", std::make_shared<FunctionValue>(even_question_function_pointer));
@@ -390,7 +399,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 //string->symbol
     auto string_to_symbol_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         auto string = std::static_pointer_cast<StringValue>(argv[0]);
-        return std::static_pointer_cast<Value>(std::make_shared<SymbolValue>(string->to_string()));
+        return std::static_pointer_cast<Value>(std::make_shared<SymbolValue>(string->get_value()));
     };
     set("string->symbol", std::make_shared<FunctionValue>(string_to_symbol_function_pointer));
 
@@ -421,7 +430,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
 
     auto string_length_function_pointer = [](size_t argc, std::vector<ValuePtr> &argv) {
         auto string = std::static_pointer_cast<StringValue>(argv[0]);
-        return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(string->to_string().length()));
+        return std::static_pointer_cast<Value>(std::make_shared<IntegerValue>(string->get_value().length()));
     };
     set("string-length", std::make_shared<FunctionValue>(string_length_function_pointer));
 
@@ -431,7 +440,7 @@ BaseEnvironment::BaseEnvironment() : Environment(nullptr) {
         auto string = std::static_pointer_cast<StringValue>(argv[0]);
         auto index = std::static_pointer_cast<IntegerValue>(argv[1]);
         return std::static_pointer_cast<Value>(
-                std::make_shared<StringValue>(string->to_string().substr(index->get_value(), 1)));
+                std::make_shared<StringValue>(string->get_value().substr(index->get_value(), 1)));
     };
     set("string-ref", std::make_shared<FunctionValue>(string_ref_function_pointer));
 

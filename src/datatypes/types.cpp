@@ -56,6 +56,10 @@ std::string ListValue::to_string() const {
 
 
 std::string StringValue::to_string() const {
+    return "\"" +value + "\"";
+}
+
+std::string StringValue::get_value() const {
     return value;
 }
 
